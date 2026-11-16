@@ -1,22 +1,17 @@
-// Strict mode helps JavaScript catch certain mistakes.
+
+
+
+
+
 "use strict";
-// /** Shared page elements lookup reusable shortcut; reuse instead of repeating getElementById calls. */
-// /** Shared USD formatting reusable shortcut for prices displayed throughout the page. */
 const money = value =>
   "$" + Number(value).toFixed(2);
-// /** Creates a new HTML page item so JavaScript can add content to the page.
-// /** Creates a page elements page item with optional class and text content. */
-// Makes a new HTML element and optionally gives it a class and text.
 function element(tag, className = "", text = "") {
   const node = document.createElement(tag);
   node.className = className;
   node.textContent = text;
   return node;
 }
-// /* ============================================
-// 1. ALL 13 MANHATTAN STORE LOCATIONS
-// ============================================ */
-
 const stores = [
   {
     name: "Village Revival Records",
@@ -123,11 +118,6 @@ const stores = [
     reputationCopies: 0
   }
 ];
-// /* ============================================
-// 2. spreadsheet-style data file NAME NORMALIZATION
-// ============================================ */
-// /** Normalizes text so names can be compared consistently.
-// Makes store names lowercase and removes extra punctuation so names match.
 function normalize(value) {
   return String(value ?? "")
     .toLowerCase()
@@ -159,8 +149,6 @@ const storeAliases = {
 
   "barnes and noble upper west side": 12
 };
-// /** Matches an inventory store name to its store record.
-// Finds which store in our store list matches a name.
 function getStoreIndex(name) {
   const key = normalize(name);
 
@@ -171,9 +159,6 @@ function getStoreIndex(name) {
     ? storeAliases[key]
     : -1;
 }
-// /* ============================================
-// 3. ALBUM NAME NORMALIZATION
-// ============================================ */
 
 const albumOrder = [
   "Taylor Swift (Debut)",
@@ -193,6 +178,11 @@ const albumOrder = [
   "TTPD",
   "Life of a Showgirl"
 ];
+
+function displayAlbumName(name) {
+  return name === "TTPD" ? "The Tortured Poets Department" :
+    name === "Life of a Showgirl" ? "The Life of a Show girl" : name;
+}
 
 const albumAliases = {
   "taylor swift": "Taylor Swift (Debut)",
@@ -226,24 +216,12 @@ const albumAliases = {
   "life of a showgirl": "Life of a Showgirl",
   "the life of a showgirl": "Life of a Showgirl"
 };
-// /** Standardizes album titles for matching across datasets.
-// Cleans up album names so slightly different spellings still match.
 function normalizeAlbum(name) {
   const key = normalize(name);
 
   return albumAliases[key] ||
     String(name ?? "").trim();
 }
-// /* ============================================
-// 4. spreadsheet-style data file PARSING
-// Handles:
-// - Extra spaces in headers
-// - Dollar signs
-// - Quoted spreadsheet-style data file values
-// - Windows and Mac line endings
-// ============================================ */
-// /** Parses spreadsheet-style data file text into structured row objects.
-// Reads CSV text one character at a time and turns it into rows and columns.
 function parseCSV(text) {
   text = text.replace(/^\uFEFF/, "");
 
@@ -314,9 +292,6 @@ function parseCSV(text) {
     return result;
   });
 }
-// /** Fetches and parses a spreadsheet-style data file data file.
-// Loads data needed by the page. set of instructions: loadCSV.
-// Loads a CSV file from the project folder and reads its contents.
 async function loadCSV(path) {
   const response = await fetch(path);
 
@@ -330,8 +305,6 @@ async function loadCSV(path) {
 
   return parseCSV(text);
 }
-// /** Reads a field using alternative possible column names.
-// Finds a spreadsheet value even when the column has a different heading.
 function getField(row, candidates) {
   for (const candidate of candidates) {
     const key = normalize(candidate);
@@ -348,8 +321,6 @@ function getField(row, candidates) {
 
   return "";
 }
-// /** Converts a source price value to a numeric amount.
-// Turns a price such as "$19.99" into a number.
 function parsePrice(value) {
   const cleaned = String(value ?? "")
     .replace(/[$,]/g, "")
@@ -361,10 +332,6 @@ function parsePrice(value) {
 
   return Number(cleaned);
 }
-// /* ============================================
-// 5. SHARED DATA
-// ============================================ */
-
 let albumData = new Map();
 let foundAlbums = [];
 let missingAlbums = [];
@@ -379,27 +346,19 @@ let selectedAlbum = null;
 let selectedStoreIndex = null;
 
 let wallMode = "found";
-// /* ============================================
-// 6. LOAD INVENTORY
-// ============================================ */
-// /** Builds store and album inventory totals from spreadsheet-style data file rows.
-// Counts albums and copies using the inventory spreadsheet.
 function processInventory(rows) {
   stores.forEach(store => {
     store.albums = [];
     store.reputationCopies = 0;
   });
-
   unmatchedRows = [];
   invalidRows = [];
-
   rows.forEach((row, index) => {
     const storeName = getField(row, [
       "Name of Record Store",
       "Record Store",
       "Store"
     ]);
-
     const albumName = normalizeAlbum(
       getField(row, [
         "Album",
@@ -407,23 +366,19 @@ function processInventory(rows) {
         "Title"
       ])
     );
-
     const quantity = Number(
       getField(row, [
         "Quantity",
         "Copies"
       ])
     );
-
     const price = parsePrice(
       getField(row, [
         "Price",
         "Shelf Price"
       ])
     );
-
     const storeIndex = getStoreIndex(storeName);
-
     if (
       !storeName ||
       !albumName ||
@@ -438,7 +393,6 @@ function processInventory(rows) {
       });
       return;
     }
-
     if (storeIndex === -1) {
       unmatchedRows.push({
         row: index + 2,
@@ -446,20 +400,16 @@ function processInventory(rows) {
       });
       return;
     }
-
     stores[storeIndex].albums.push({
       title: albumName,
       quantity,
       price
     });
-
     if (albumName === "Reputation") {
       stores[storeIndex].reputationCopies += quantity;
     }
   });
-
   albumData = new Map();
-
   albumOrder.forEach(title => {
     albumData.set(title, {
       title,
@@ -468,7 +418,6 @@ function processInventory(rows) {
       listings: []
     });
   });
-
   stores.forEach((store, storeIndex) => {
     store.albums.forEach(album => {
       if (!albumData.has(album.title)) {
@@ -479,12 +428,9 @@ function processInventory(rows) {
           listings: []
         });
       }
-
       const record = albumData.get(album.title);
-
       record.copies += album.quantity;
       record.storeIndices.add(storeIndex);
-
       record.listings.push({
         storeIndex,
         storeName: store.name,
@@ -494,39 +440,29 @@ function processInventory(rows) {
       });
     });
   });
-
   const allAlbums = [...albumData.values()];
-
   foundAlbums = allAlbums.filter(
     album => album.copies > 0
   );
-
   missingAlbums = allAlbums.filter(
     album => album.copies === 0
   );
-
   priceAlbums = foundAlbums.filter(
     album => album.listings.length > 0
   );
-
   const totalCopies = foundAlbums.reduce(
     (sum, album) => sum + album.copies,
     0
   );
-
   const storesWithVinyl = stores.filter(
     store => store.albums.length > 0
   ).length;
-
   const reputationCopies =
     albumData.get("Reputation")?.copies ?? 0;
-
-  document.getElementById("stat-stores").textContent = stores.length;
-  document.getElementById("stat-found").textContent = storesWithVinyl;
-  document.getElementById("stat-copies").textContent = totalCopies;
-  document.getElementById("stat-reputation").textContent =
-    reputationCopies;
-
+  if (document.getElementById("stat-stores")) document.getElementById("stat-stores").textContent = stores.length;
+  if (document.getElementById("stat-found")) document.getElementById("stat-found").textContent = storesWithVinyl;
+  if (document.getElementById("stat-copies")) document.getElementById("stat-copies").textContent = totalCopies;
+  if (document.getElementById("stat-reputation")) document.getElementById("stat-reputation").textContent = reputationCopies;
   if (
     unmatchedRows.length ||
     invalidRows.length
@@ -538,22 +474,18 @@ function processInventory(rows) {
       `and ${invalidRows.length} invalid rows ` +
       "were excluded. Check the browser console."
     );
-
     document.getElementById("dashboard")
       .querySelector(".section-inner")
       .appendChild(note);
-
     console.warn(
       "Unmatched stores:",
       unmatchedRows
     );
-
     console.warn(
       "Invalid inventory rows:",
       invalidRows
     );
   }
-
   console.log("Inventory summary:", {
     stores: stores.length,
     storesWithVinyl,
@@ -561,18 +493,8 @@ function processInventory(rows) {
     reputationCopies
   });
 }
-// /* ============================================
-// 7. LOAD ORIGINAL PRICE spreadsheet-style data file
-// Your file currently has:
-// Album, Original Price
-// Optional future columns:
-// Edition, Source
-// ============================================ */
-// /** Processes historical/reference prices for comparisons.
-// Reads the original retail prices from the price spreadsheet.
 function processOriginalPrices(rows) {
   retailReferences = new Map();
-
   rows.forEach((row, index) => {
     const title = normalizeAlbum(
       getField(row, [
@@ -581,7 +503,6 @@ function processOriginalPrices(rows) {
         "Title"
       ])
     );
-
     const price = parsePrice(
       getField(row, [
         "Original Price",
@@ -590,21 +511,18 @@ function processOriginalPrices(rows) {
         "Price"
       ])
     );
-
     const edition = getField(row, [
       "Edition",
       "Vinyl Edition",
       "Pressing",
       "Description"
     ]).trim();
-
     const source = getField(row, [
       "Source",
       "Source URL",
       "URL",
       "Link"
     ]).trim();
-
     if (
       !title ||
       !Number.isFinite(price) ||
@@ -615,14 +533,12 @@ function processOriginalPrices(rows) {
       );
       return;
     }
-
     if (retailReferences.has(title)) {
       console.warn(
         `Duplicate original-price entry: ${title}`
       );
       return;
     }
-
     retailReferences.set(title, {
       price,
       edition,
@@ -630,12 +546,6 @@ function processOriginalPrices(rows) {
     });
   });
 }
-// /* ============================================
-// 8. clickable or changeable VINYL WALL
-// ============================================ */
-// /* VINYL WALL — ALL ALBUMS STAY VISIBLE
-// Toggle buttons highlight found or missing albums, rather than filtering them.
-// Cover images live beside index.html. Add the remaining PNGs as listed below. */
 const albumCoverFiles = {
   "Taylor Swift (Debut)": "debut.png",
   "Fearless": "fearless.png",
@@ -654,24 +564,18 @@ const albumCoverFiles = {
   "TTPD": "TTPD.png",
   "Life of a Showgirl": "the_life_of_a_showgirl.png"
 };
-// /* Each circular line represents one album, including separate Taylor's Versions. */
 let vinylFocusedStore = "all";
 
-// Creates a curved section of a ring, with a small gap between stores.
-// Draws one curved piece of a record ring.
 function vinylArc(cx, cy, radius, start, end) {
   const point = angle => [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
   const a = point(start), b = point(end);
   return `M ${a[0]} ${a[1]} A ${radius} ${radius} 0 ${end-start > Math.PI ? 1 : 0} 1 ${b[0]} ${b[1]}`;
 }
-
-// Opens the selected album's details while keeping the existing Spotify player.
-// Shows details for the album someone clicked.
 function showVinylDetails(title, storeIndex = null) {
   const album = albumData.get(title);
   if (!album) return;
   const panel = document.getElementById("vinyl-details");
-  if (!panel) return; // Investigation card was intentionally removed.
+  if (!panel) return; 
   panel.replaceChildren();
   panel.append(element("p", "eyebrow", "Album investigation"), element("h4", "", title));
   panel.append(element("p", "", `${album.copies} recorded copies across ${album.storeIndices.size} of ${stores.length} stores.`));
@@ -679,12 +583,10 @@ function showVinylDetails(title, storeIndex = null) {
   const listen = element("button", "", "Open Spotify player");
   listen.type = "button";
   listen.addEventListener("click", () => playAlbumMusic(title));
-  const mapButton = element("button", "secondary", "Explore on map");
+  const mapButton = element("button", "secondary", "Choose a store");
   mapButton.type = "button";
   mapButton.addEventListener("click", () => {
-    // Focus the map already shown next to the vinyl.
-    const target = document.getElementById("vinyl-map-dock");
-    if (target) target.scrollIntoView({behavior:"smooth",block:"nearest"});
+    document.getElementById("store-picker")?.focus();
   });
   actions.append(listen, mapButton);
   panel.append(actions);
@@ -720,108 +622,274 @@ function showVinylDetails(title, storeIndex = null) {
   });
 }
 
-// Gives every album its own exact color, including separate Taylor’s Version colors.
 const vinylAlbumColors = {
   "Taylor Swift (Debut)": "#34F3FF",
   "Fearless": "#f6ed95",
-  "Fearless (TV)": "#bb8f67",
-  "Speak Now": "#52316B",
-  "Speak Now (TV)": "#923c81",
-  "Red": "#440201",
-  "Red (TV)": "#651D01",
-  "1989": "#789ac0",
-  "1989 (TV)": "#5b86ae",
-  "Reputation": "#727272",
+  "Fearless (TV)": "#F6BE80",
+  "Speak Now": "#B982F5",
+  "Speak Now (TV)": "#E278CE",
+  "Red": "#FF5963",
+  "Red (TV)": "#FF825C",
+  "1989": "#9DCCFF",
+  "1989 (TV)": "#62B5FF",
+  "Reputation": "#D1D5E3",
   "Lover": "#fdc0cc",
-  "Folklore": "#abaaaa",
-  "Evermore": "#7f3c10",
-  "Midnights": "#526d85",
-  "TTPD": "#a79e8f",
-  "Life of a Showgirl": "#5eb298",
+  "Folklore": "#E5E6EC",
+  "Evermore": "#EFA66B",
+  "Midnights": "#8AAFFF",
+  "TTPD": "#EAD8C3",
+  "Life of a Showgirl": "#68F5BE",
 };
 
-// Draws one record with an album ring for every album in the site's existing list.
-// Draws the album wall and its clickable record rings.
+function updateVinylPricePanel(albumTitle, storeIndex) {
+  const pricePicker = document.getElementById("album-select");
+  if (albumTitle && pricePicker && pricePicker.value !== albumTitle &&
+      [...pricePicker.options].some(option => option.value === albumTitle)) {
+    pricePicker.value = albumTitle;
+    renderPriceExplorer();
+  }
+
+  const title = document.getElementById("vinyl-price-title");
+  const storeText = document.getElementById("vinyl-price-store");
+  const values = document.getElementById("vinyl-price-values");
+  if (!title || !storeText || !values) return;
+  values.replaceChildren();
+  if (!albumTitle || storeIndex === null || storeIndex === undefined || !stores[storeIndex]) {
+    title.textContent = albumTitle ? displayAlbumName(albumTitle) : "Select an album";
+    storeText.textContent = albumTitle ? "Showing prices across all stores. Click a store slice for its specific prices." : "Choose an album to compare prices.";
+    return;
+  }
+  const album = albumData.get(albumTitle);
+  const store = stores[storeIndex];
+  const listings = album?.listings.filter(row => row.storeIndex === storeIndex) || [];
+  const copies = listings.reduce((sum, row) => sum + (row.quantity || 0), 0);
+  title.textContent = displayAlbumName(albumTitle);
+  storeText.textContent = `${store.name} · ${copies} ${copies === 1 ? "copy" : "copies"} recorded`;
+  const addRow = (label, value) => {
+    const row = document.createElement("div"); row.className = "vinyl-price-row";
+    const name = document.createElement("span"); name.textContent = label;
+    const amount = document.createElement("strong"); amount.textContent = value;
+    row.append(name, amount); values.append(row);
+  };
+  const retail = retailReferences.get(albumTitle)?.price;
+  addRow("Original retail", Number.isFinite(retail) ? money(retail) : "Not recorded");
+  const prices = [...new Set(listings.map(row => row.price).filter(Number.isFinite))].sort((a,b) => a-b);
+  if (prices.length) prices.forEach((price,i) => addRow(prices.length === 1 ? "Store price" : `Store price ${i+1}`, money(price)));
+  else addRow("Store price", "Not recorded");
+}
+
 function renderWall() {
   const container = document.getElementById("album-chart");
-  container.replaceChildren();
-  const showingFound = true; // The vinyl now has one consistent view.
-  document.getElementById("wall-title").textContent = "The Vinyl Archive";
-  document.getElementById("wall-description").textContent = "Each album has its own colored ring, divided into 13 stores. White sections show which albums were available at each store. Click on a ring to listen to the album. (you can also drag the Spotify box if it gets in the way)";
-  const albums = [...albumData.values()];
+  const albums = [...albumData.values()].reverse();
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
-  const center = 390, outer = 350, spacing = 18.5;
-  svg.setAttribute("viewBox", "0 0 780 780");
+  svg.classList.add("vinyl-rotating-disc");
+  const center = 650, outer = 530, spacing = 26; // Separate price waves and sparse stock ticks, with room between albums.
+  svg.setAttribute("viewBox", "0 0 1300 1300");
   svg.setAttribute("role", "group");
-  svg.setAttribute("aria-label", "Sixteen album rings with thirteen store sections each");
-  albums.forEach((album, albumIndex) => {
-    const radius = outer - albumIndex * spacing;
-    const albumSelected = selectedAlbum === album.title;
-    // Draw a quiet halo BEHIND the entire selected album ring.
-    if (albumSelected) {
-      const halo = document.createElementNS(svgNS, "circle");
-      halo.setAttribute("cx", center);
-      halo.setAttribute("cy", center);
-      halo.setAttribute("r", radius);
-      halo.setAttribute("fill", "none");
-      halo.setAttribute("stroke", "#fff4d8");
-      halo.setAttribute("stroke-width", "13");
-      halo.setAttribute("stroke-opacity", ".45");
-      halo.setAttribute("pointer-events", "none");
-      svg.append(halo);
-    }
-    stores.forEach((store, storeIndex) => {
-      const found = store.albums.some(item => item.title === album.title);
-      const step = 2 * Math.PI / stores.length;
-      const start = -Math.PI / 2 + storeIndex * step + .015;
-      const end = -Math.PI / 2 + (storeIndex + 1) * step - .015;
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("d", vinylArc(center, center, radius, start, end));
-      path.setAttribute("fill", "none");
-      // White means a copy was recorded; otherwise show this album’s own color.
-      path.setAttribute("stroke", found ? "#ffffff" : vinylAlbumColors[album.title] || "#727272");
-      path.setAttribute("stroke-width", albumSelected ? "8" : "6.5");
-      const inFocus = vinylFocusedStore === "all" || Number(vinylFocusedStore) === storeIndex;
-      // Other rings stay colorful; selected ring is unmistakably brighter.
-      path.setAttribute("opacity", !inFocus ? ".34" : albumSelected ? "1" : found ? ".94" : ".66");
-      // A thin dark under-stroke makes white stock markers visible on light albums.
-      if (found) {
-        const contrast = document.createElementNS(svgNS, "path");
-        contrast.setAttribute("d", path.getAttribute("d"));
-        contrast.setAttribute("fill", "none");
-        contrast.setAttribute("stroke", "#161616");
-        contrast.setAttribute("stroke-width", albumSelected ? "11" : "9");
-        contrast.setAttribute("opacity", !inFocus ? ".34" : "1");
-        contrast.setAttribute("pointer-events", "none");
-        svg.append(contrast);
+  svg.setAttribute("aria-label", "Colored album sound-wave grooves divided into thirteen store slices, with price markers only for recorded CSV values");
+  const svgItem = (tag, attrs, parent = svg) => {
+    const node = document.createElementNS(svgNS, tag);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
+    parent.append(node);
+    return node;
+  };
+  const allSpreads = albums.flatMap(album => {
+    const retail = retailReferences.get(album.title)?.price;
+    if (!Number.isFinite(retail)) return [];
+    return album.listings.map(row => Math.abs(row.price - retail));
+  });
+  const maxSpread = Math.max(1, ...allSpreads);
+  const maxCopies = Math.max(1, ...albums.flatMap(album => album.listings.map(row => row.quantity || 0)));
+  const storeCount = stores.length; // Thirteen equal slices.
+  const storeAngle = 2 * Math.PI / storeCount;
+  const polar = (radius, angle) => ({
+    x: center + radius * Math.cos(angle),
+    y: center + radius * Math.sin(angle)
+  });
+
+  svgItem("circle", {cx:center,cy:center,r:outer+22,fill:"#08090d",
+    "fill-opacity":.94,stroke:"#5d5d64","stroke-width":1.2,
+    "pointer-events":"none"});
+
+  stores.forEach((store, i) => {
+    const start = -Math.PI / 2 + i * storeAngle;
+    const end = start + storeAngle;
+    const a = polar(61, start), b = polar(outer + 19, start);
+    const c = polar(outer + 19, end), d = polar(61, end);
+    const isSelected = selectedStoreIndex === i;
+    svgItem("path", {
+      d:`M ${a.x} ${a.y} L ${b.x} ${b.y} A ${outer+19} ${outer+19} 0 0 1 ${c.x} ${c.y} L ${d.x} ${d.y} A 61 61 0 0 0 ${a.x} ${a.y} Z`,
+      fill: isSelected ? "#ffe5a0" : "#f5f0e9",
+      "fill-opacity": isSelected ? .095 : (i % 2 === 0 ? .035 : .008),
+      "pointer-events":"none"
+    });
+    const from = polar(61, start);
+    const to = polar(outer + 19, start);
+    const divider = svgItem("line", {x1:from.x,y1:from.y,x2:to.x,y2:to.y,
+      stroke: isSelected ? "#ffe5a0" : "#d7d4dc",
+      "stroke-width":isSelected ? 2.2 : 1.4,
+      "stroke-opacity":isSelected ? .88 : .53,
+      "pointer-events":"none"});
+    svgItem("title",{},divider).textContent = `Store ${i+1}: ${store.name}`;
+  });
+
+  const chooseVinylStore = index => {
+    const album = selectedAlbum || albums[0]?.title;
+    if (!album) return;
+    if (selectedAlbum !== album) selectAlbum(album);
+    vinylFocusedStore = String(index);
+    showStore(index);
+    updateVinylPricePanel(album, index);
+    renderWall();
+  };
+
+  const labelsGroup = svgItem("g", {"class":"vinyl-store-labels"});
+  const flipLabels = new Set([
+    "A-1 Record Shop", "Limited to One Records", "Academy Records & CDs",
+    "Barnes & Noble — Union Square", "Barnes & Noble — Fifth Avenue",
+    "Urban Outfitters — Fifth Avenue", "Rough Trade Below"
+  ]);
+  stores.forEach((store, i) => {
+    const middle = -Math.PI / 2 + (i + .5) * storeAngle;
+    const halfArc = storeAngle * .46;
+    const radius = outer + 43;
+    const bottom = (Math.sin(middle) > 0) !== flipLabels.has(store.name);
+    const firstAngle = bottom ? middle + halfArc : middle - halfArc;
+    const lastAngle = bottom ? middle - halfArc : middle + halfArc;
+    const first = polar(radius, firstAngle);
+    const last = polar(radius, lastAngle);
+    const arcId = `vinyl-store-label-arc-${i}`;
+    svgItem("path", {id:arcId,
+      d:`M ${first.x} ${first.y} A ${radius} ${radius} 0 0 ${bottom ? 0 : 1} ${last.x} ${last.y}`,
+      fill:"none",stroke:"none"}, labelsGroup);
+    const label = svgItem("text", {
+      fill: selectedStoreIndex === i ? "#ffe5a0" : "#f7f3ef",
+      "font-size":12,"font-weight":650,
+      "letter-spacing":"0.15", "text-anchor":"middle",
+      "paint-order":"stroke",stroke:"#08090d","stroke-width":3,
+      "stroke-linejoin":"round", "pointer-events":"visiblePainted",
+      role:"button",tabindex:0,"aria-label":`Select ${store.name}`,
+      "aria-pressed":selectedStoreIndex === i ? "true" : "false",
+      "class":"vinyl-store-name"
+    },labelsGroup);
+    const textOnArc = svgItem("textPath", {href:`#${arcId}`, "startOffset":"50%"},label);
+    textOnArc.textContent = store.name;
+    label.addEventListener("click", event => { event.stopPropagation(); chooseVinylStore(i); });
+    label.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); chooseVinylStore(i);
       }
-      path.classList.add("vinyl-ring-segment");
-      if (selectedAlbum === album.title) path.classList.add("is-selected");
-      path.setAttribute("tabindex", "0");
-      path.setAttribute("role", "button");
-      path.setAttribute("aria-label", `${album.title}, ${store.name}: ${found ? "recorded in store" : "no copy recorded"}`);
-      const title = document.createElementNS(svgNS, "title");
-      title.textContent = `${album.title} — ${store.name}: ${found ? "found" : "no copy recorded"}`;
-      path.append(title);
-      const choose = () => {
-        selectAlbum(album.title);
-        vinylFocusedStore = String(storeIndex);
-        renderWall();
-        showVinylDetails(album.title, storeIndex);
-        // Reuse the existing marker and store panel without navigating away.
-        showStore(storeIndex);
-        map.resize();
-      };
-      path.addEventListener("click", choose);
-      path.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); }
-      });
-      svg.append(path);
     });
   });
-  // The vinyl's center label: a miniature physical record with grooves and a spindle hole.
-  // Keep all these SVG shapes non-interactive so they never intercept ring clicks.
+
+  stores.forEach((store, index) => {
+    const start = -Math.PI / 2 + index * storeAngle;
+    const end = start + storeAngle;
+    const a = polar(64, start), b = polar(outer + 18, start);
+    const c = polar(outer + 18, end), d = polar(64, end);
+    const wedge = svgItem("path", {d:`M ${a.x} ${a.y} L ${b.x} ${b.y} A ${outer+18} ${outer+18} 0 0 1 ${c.x} ${c.y} L ${d.x} ${d.y} A 64 64 0 0 0 ${a.x} ${a.y} Z`,
+      fill:"transparent",role:"button",tabindex:0,"aria-label":`Select ${store.name}`});
+    const chooseStore = () => chooseVinylStore(index);
+    wedge.addEventListener("click",chooseStore);
+    wedge.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();chooseStore();}});
+  });
+
+  albums.forEach((album, albumIndex) => {
+    const radius = outer - albumIndex * spacing;
+    const color = vinylAlbumColors[album.title] || "#aaa";
+    const retail = retailReferences.get(album.title)?.price;
+    const hasRetail = Number.isFinite(retail) && retail > 0;
+    const albumInFocus = !selectedAlbum || selectedAlbum === album.title;
+    const albumPeakDifference = hasRetail
+      ? Math.max(0, ...album.listings.filter(row => Number.isFinite(row.price)).map(row => Math.abs(row.price - retail)))
+      : 0;
+    const albumAmplitude = 1.2 + 8.5 * Math.sqrt(albumPeakDifference / maxSpread);
+    stores.forEach((store, storeIndex) => {
+      const listings = album.listings.filter(row => row.storeIndex === storeIndex);
+      const copies = listings.reduce((sum, row) => sum + (row.quantity || 0), 0);
+      const hasStock = copies > 0;
+      const prices = listings.map(row => row.price).filter(Number.isFinite);
+      const values = hasRetail ? [retail, ...prices] : prices;
+      const low = values.length ? Math.min(...values) : null;
+      const high = values.length ? Math.max(...values) : null;
+      const storeSpread = hasRetail && prices.length
+        ? Math.max(...prices.map(p => Math.abs(p - retail))) : 0;
+      const hasPriceComparison = hasStock && hasRetail && prices.length > 0;
+      const amplitude = hasPriceComparison
+        ? 1.2 + 8.5 * Math.sqrt(storeSpread / maxSpread)
+        : albumAmplitude;
+      const inFocus = vinylFocusedStore === "all" || Number(vinylFocusedStore) === storeIndex;
+      const opacity = 1; // Keep every album vivid, even when another store or album is selected.
+      const startAngle = -Math.PI / 2 + storeIndex * storeAngle;
+      const samples = 96;
+      const pointedSine = t => {
+        const sine = Math.sin(2 * Math.PI * t);
+        return Math.sign(sine) * Math.pow(Math.abs(sine), 6);
+      };
+      const waveRadius = t => radius - amplitude * pointedSine(t);
+      const commands = [];
+      for (let i = 0; i <= samples; i++) {
+        const t = i / samples;
+        const pos = polar(waveRadius(t), startAngle + storeAngle * t);
+        commands.push(`${i ? "L" : "M"}${pos.x.toFixed(2)} ${pos.y.toFixed(2)}`);
+      }
+      const wave = svgItem("path", {d: commands.join(" "), fill: "none", stroke: color,
+        "stroke-width": 3.5, "stroke-opacity": 1,
+        "stroke-dasharray": hasPriceComparison ? "none" : "4 6",
+        "stroke-linecap": "round", "stroke-linejoin": "round",
+        style: "filter: drop-shadow(0 0 3px " + color + ");", "pointer-events": "none"});
+      svgItem("title", {}, wave).textContent = `${album.title} at ${store.name}: ${hasPriceComparison ? "observed price comparison" : "no comparable store price"}`;
+
+      if (hasStock) {
+        const visibleTicks = Math.min(copies, 8);
+        for (let tickIndex = 0; tickIndex < visibleTicks; tickIndex++) {
+          const t = .22 + .56 * (tickIndex + .5) / visibleTicks;
+          const angle = startAngle + storeAngle * t;
+          const inner = polar(radius - 19, angle);
+          const outerTick = polar(radius - 12, angle);
+          const tick = svgItem("line", {
+            x1: inner.x, y1: inner.y, x2: outerTick.x, y2: outerTick.y,
+            stroke: color, "stroke-width": 2.8, "stroke-linecap": "square",
+            "stroke-opacity": 1, "pointer-events": "none"
+          });
+          svgItem("title", {}, tick).textContent =
+            `${album.title} • ${store.name}: ${copies} copies in stock`;
+        }
+      }
+
+      const hit = svgItem("path", {d:vinylArc(center,center,radius,startAngle,startAngle+storeAngle),
+        fill:"none",stroke:"transparent","stroke-width":19,role:"button",tabindex:0,
+        "aria-label":`${album.title}, ${store.name}: ${hasStock ? `${copies} copies` : "not found"}`});
+      svgItem("title",{},hit).textContent = `${album.title} • ${store.name} • ${hasStock ? `${copies} copies` : "No copies recorded"}${hasRetail ? ` • retail ${money(retail)}` : ""}`;
+      const choose = () => {selectAlbum(album.title);vinylFocusedStore=String(storeIndex);renderWall();showVinylDetails(album.title,storeIndex);showStore(storeIndex);updateVinylPricePanel(album.title,storeIndex);};
+      hit.addEventListener("click",choose);
+      hit.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();choose();}});
+      if (hasPriceComparison) {
+        const observedPrices = [...new Set(prices)].sort((a, b) => a - b);
+        const markers = [
+          {label: "Original retail price (CSV)", price: retail, isRetail: true},
+          ...observedPrices.map(price => ({
+            label: "Observed store price (CSV)", price, isRetail: false
+          }))
+        ];
+        markers.forEach((mark, i) => {
+          const t = .14 + .72 * (i + .5) / markers.length;
+          const angle = startAngle + storeAngle * t;
+          const pos = polar(waveRadius(t), angle);
+          const dot = svgItem("circle", {
+            cx: pos.x, cy: pos.y, r: mark.isRetail ? 4.8 : 4.3,
+            fill: mark.isRetail ? "#fff" : color,
+            stroke: "#09090d", "stroke-width": 1.1,
+            "fill-opacity": Math.max(.85, opacity), role: "img", tabindex: 0,
+            "aria-label": `${album.title}, ${store.name}, ${mark.label}: ${money(mark.price)}`
+          });
+          svgItem("title", {}, dot).textContent = `${album.title} • ${store.name}\n${mark.label}: ${money(mark.price)}\n${copies} copies recorded`;
+          dot.addEventListener("click", choose);
+        });
+      }
+    });
+  });
   const recordCircle = (radius, fill, stroke = "none", strokeWidth = 0) => {
     const circle = document.createElementNS(svgNS, "circle");
     circle.setAttribute("cx", center);
@@ -834,16 +902,14 @@ function renderWall() {
     svg.append(circle);
     return circle;
   };
-  // Dark outer vinyl edge and fine pressed-in grooves.
-  recordCircle(62, "#101011", "#38383a", 1.5);
-  [58, 55, 52].forEach((radius, index) => {
-    const groove = recordCircle(radius, "none", index === 1 ? "#5b5b5b" : "#343434", .8);
+  recordCircle(130, "#101011", "#38383a", 2);
+  [125, 120, 115].forEach((radius, index) => {
+    const groove = recordCircle(radius, "none", index === 1 ? "#5b5b5b" : "#343434", 1.2);
     groove.setAttribute("opacity", index === 1 ? ".65" : ".5");
   });
-  // Muted cream paper label, like the center of a physical vinyl record.
-  recordCircle(46, "#e8dfcd", "#8d8170", 1.5);
-  recordCircle(41, "none", "#b2a695", .8);
-  recordCircle(33, "none", "#b2a695", .65);
+  recordCircle(105, "#e8dfcd", "#8d8170", 2);
+  recordCircle(96, "none", "#b2a695", 1.2);
+  recordCircle(76, "none", "#b2a695", 1);
   const centerText = (label, y, size, weight = "normal", color = "#24201e", spacing = "0") => {
     const text = document.createElementNS(svgNS, "text");
     text.setAttribute("x", center);
@@ -857,54 +923,32 @@ function renderWall() {
     text.textContent = label;
     svg.append(text);
   };
-  centerText("33⅓ RPM", center - 25, "8", "bold", "#54473d", "1.2");
-  centerText("TAYLOR SWIFT", center - 10, "9", "bold", "#24201e", ".8");
-  centerText("VINYL ARCHIVE", center + 23, "7.5", "bold", "#54473d", "1");
-  centerText("NYC · 13 STORES", center + 33, "6.2", "normal", "#54473d", ".5");
-  // The spindle hole is drawn last so it stays visible above the paper label.
-  recordCircle(6.5, "#171717", "#847969", 1.5);
+  centerText("33⅓ RPM", center - 56, "15", "bold", "#54473d", "1.2");
+  centerText("TAYLOR SWIFT", center - 25, "18", "bold", "#24201e", ".8");
+  centerText("VINYL ARCHIVE", center + 49, "15", "bold", "#54473d", "1");
+  centerText("NYC · 13 STORES", center + 66, "12", "normal", "#54473d", ".5");
+  recordCircle(10, "#171717", "#847969", 2);
   recordCircle(2.5, "#080808");
-  container.append(svg);
-  // The album list makes every ring easy to identify, including on small screens.
-  const picker = element("select", "vinyl-select");
-  picker.setAttribute("aria-label", "Choose an album ring");
-  const prompt = element("option", "", "Choose an album ring…");
-  prompt.value = "";
-  picker.append(prompt);
-  albums.forEach(album => {
-    const option = element("option", "", album.title);
-    option.value = album.title;
-    picker.append(option);
-  });
-  picker.value = selectedAlbum || "";
-  picker.addEventListener("change", () => {
-    if (!picker.value) return;
-    selectAlbum(picker.value);
-    vinylFocusedStore = "all";
-    renderWall();
-    showVinylDetails(picker.value);
-  });
-  container.append(picker);
-}
-// /* ============================================
-// 9. PRICE EXPLORER
-// ============================================ */
-// /** Populates the album dropdown from loaded inventory.
+  svg.append(labelsGroup);
+  const rotatingDisc = container.querySelector("svg.vinyl-rotating-disc");
+  if (rotatingDisc) {
+    rotatingDisc.replaceChildren(...Array.from(svg.childNodes));
+    rotatingDisc.setAttribute("viewBox", svg.getAttribute("viewBox"));
+    rotatingDisc.setAttribute("aria-label", svg.getAttribute("aria-label"));
+  } else {
+    container.append(svg);
+  }
 
-// Adds the album names to the price dropdown.
+}
 function populateAlbumSelect() {
   const select = document.getElementById("album-select");
   select.replaceChildren();
-
   priceAlbums.forEach(album => {
     const option = document.createElement("option");
-
     option.value = album.title;
-    option.textContent = album.title;
-
+    option.textContent = displayAlbumName(album.title);
     select.appendChild(option);
   });
-
   if (
     priceAlbums.some(
       album => album.title === "Fearless (TV)"
@@ -913,8 +957,6 @@ function populateAlbumSelect() {
     select.value = "Fearless (TV)";
   }
 }
-// /** Updates price summary metrics and store results for the selected album.
-// Updates the prices and stores shown for the chosen album.
 function renderPriceExplorer() {
   const title = document.getElementById("album-select").value;
   const album = albumData.get(title);
@@ -938,303 +980,79 @@ function renderPriceExplorer() {
     details.append(element("strong", "", listing.storeName),
       element("small", "", `${listing.neighborhood} · ${listing.quantity} copies`));
     button.append(details,element("span", "amount", money(listing.price)));
-    button.addEventListener("click", () => {clearAlbumFilter();openStoreOnMap(listing.storeIndex);});
+    button.addEventListener("click", () => {clearAlbumFilter();openStoreDetails(listing.storeIndex);});
     container.appendChild(button);
   });
-  renderPriceDumbbells();
 }
 
-// Uses the existing album palette; the CSV values are the only price sources.
-// Draws the chart comparing prices across albums.
-function renderPriceDumbbells() {
-  const chart = document.getElementById("price-dumbbells");
-  chart.replaceChildren();
-  const albums = [...new Map([
-    ...priceAlbums.map(album => [album.title, album]),
-    ...[...retailReferences.keys()].filter(title => !priceAlbums.some(a => a.title === title))
-      .map(title => [title, {title, listings: []}])
-  ]).values()];
-  const allPrices = albums.flatMap(album => {
-    const ref = retailReferences.get(album.title);
-    return [...(ref ? [ref.price] : []), ...album.listings.map(item => item.price)];
-  });
-  const maxPrice = Math.max(1, ...allPrices);
-  const top = Math.ceil(maxPrice / 10) * 10;
-  const yPercent = price => 92 - (price / top) * 83;
-
-  const key = element("div", "vertical-price-key");
-  key.innerHTML = '<span><i class="price-key-mark retail"></i> Retail reference</span><span><i class="price-key-mark low"></i> Lowest found</span><span><i class="price-key-mark high"></i> Highest found</span><span class="price-key-note">Different prices have separate circles; matching prices share one.</span>';
-  chart.appendChild(key);
-  const scroll = element("div", "vertical-price-scroll");
-  const plot = element("div", "vertical-price-plot");
-  plot.style.setProperty("--price-columns", albums.length);
-  const axis = element("div", "vertical-price-axis");
-  for (let tick = 0; tick <= 4; tick++) {
-    const price = top * tick / 4;
-    const line = element("div", "vertical-price-gridline");
-    line.style.top = yPercent(price) + "%";
-    line.appendChild(element("span", "vertical-price-tick", money(price)));
-    axis.appendChild(line);
+document.getElementById("album-select").addEventListener("change", () => {
+  const title = document.getElementById("album-select").value;
+  if (title) {
+    selectAlbum(title);
+    vinylFocusedStore = "all";
+    renderWall();
+    renderPriceExplorer();
+    updateVinylPricePanel(title, null);
   }
-  plot.appendChild(axis);
-
-  albums.forEach(album => {
-    const ref = retailReferences.get(album.title);
-    const prices = album.listings.map(item => item.price);
-    const cheapest = prices.length ? Math.min(...prices) : null;
-    const highest = prices.length ? Math.max(...prices) : null;
-    const column = element("button", "vertical-price-album");
-    column.type = "button";
-    column.style.setProperty("--album-color", vinylAlbumColors[album.title] || "#a7282d");
-    const selected = document.getElementById("album-select").value === album.title;
-    column.classList.toggle("is-selected", selected);
-    column.setAttribute("aria-label", `${album.title}: retail ${ref ? money(ref.price) : "not recorded"}; lowest ${cheapest === null ? "not found" : money(cheapest)}; highest ${highest === null ? "not found" : money(highest)}`);
-
-    const stem = element("span", "vertical-price-stem");
-    const known = [ref ? ref.price : null, cheapest, highest].filter(v => v !== null);
-    if (known.length > 1) {
-      const range = element("span", "vertical-price-range");
-      range.style.top = yPercent(Math.max(...known)) + "%";
-      range.style.height = (yPercent(Math.min(...known)) - yPercent(Math.max(...known))) + "%";
-      stem.appendChild(range);
-    }
-    // Combine equal prices into ONE marker, with every applicable role in its tooltip.
-    const groups = new Map();
-    [["Retail", ref ? ref.price : null], ["Low", cheapest], ["High", highest]].forEach(([label, value]) => {
-      if (value === null) return;
-      if (!groups.has(value)) groups.set(value, []);
-      groups.get(value).push(label);
-    });
-    // Only identical dollar amounts share a marker. Different prices always
-    // receive distinct circles on the same stem, even when values are close.
-    const STEM_HEIGHT = 350;
-    const MIN_GAP = 25; // pixels: slightly larger than the circle diameter
-    const points = [...groups.entries()]
-      .map(([price, roles]) => ({ price, roles, ideal: STEM_HEIGHT * yPercent(price) / 100 }))
-      .sort((a, b) => a.ideal - b.ideal);
-    const positions = points.map(p => p.ideal);
-    // Spread close markers vertically, without shifting them off the line.
-    for (let i = 1; i < positions.length; i++) {
-      positions[i] = Math.max(positions[i], positions[i - 1] + MIN_GAP);
-    }
-    const overflow = Math.max(0, positions[positions.length - 1] - (STEM_HEIGHT - 10));
-    if (overflow) for (let i = 0; i < positions.length; i++) positions[i] -= overflow;
-    if (positions[0] < 10) {
-      const shift = 10 - positions[0];
-      for (let i = 0; i < positions.length; i++) positions[i] += shift;
-    }
-    points.forEach((entry, i) => {
-      const point = element("span", "vertical-price-point");
-      point.style.top = (positions[i] / STEM_HEIGHT * 100) + "%";
-      point.style.left = "50%";
-      point.title = `${album.title} — ${entry.roles.join(" / ")}: ${money(entry.price)}`;
-      point.setAttribute("aria-label", point.title);
-      point.classList.toggle("is-retail", entry.roles.includes("Retail"));
-      point.classList.toggle("is-low", entry.roles.includes("Low"));
-      point.classList.toggle("is-high", entry.roles.includes("High"));
-      point.classList.toggle("is-combined", entry.roles.length > 1);
-      // A shared price gets one marker, divided only among the roles it represents.
-      // Use solid user-selected colors rather than dashed or patterned symbols.
-      if (entry.roles.length > 1) {
-        const roleColors = { Retail: "#d4af37", Low: "#0d3225", High: "#6c4040" };
-        const step = 100 / entry.roles.length;
-        const stops = entry.roles.map((role, roleIndex) => {
-          const from = (roleIndex * step).toFixed(4);
-          const to = ((roleIndex + 1) * step).toFixed(4);
-          return `${roleColors[role]} ${from}% ${to}%`;
-        });
-        point.style.background = `conic-gradient(${stops.join(", ")})`;
-      }
-      stem.appendChild(point);
-    });
-    column.appendChild(stem);
-    const cover = element("span", "vertical-price-cover");
-    const coverFile = albumCoverFiles[album.title];
-    if (coverFile) {
-      const img = document.createElement("img");
-      img.src = coverFile;
-      img.alt = "";
-      img.loading = "lazy";
-      img.onerror = () => {img.remove(); cover.textContent = "♪";};
-      cover.appendChild(img);
-    } else cover.textContent = "♪";
-    column.appendChild(cover);
-    column.appendChild(element("span", "vertical-price-name", album.title));
-    const detail = element("span", "vertical-price-detail");
-    detail.appendChild(element("span", "", "LOW  " + (cheapest === null ? "—" : money(cheapest))));
-    detail.appendChild(element("span", "", "HIGH  " + (highest === null ? "—" : money(highest))));
-    detail.appendChild(element("span", "", "RETAIL  " + (ref ? money(ref.price) : "—")));
-    column.appendChild(detail);
-    if (priceAlbums.some(item => item.title === album.title)) {
-      column.addEventListener("click", () => {document.getElementById("album-select").value = album.title; renderPriceExplorer();});
-    } else column.disabled = true;
-    plot.appendChild(column);
-  });
-  scroll.appendChild(plot);
-  chart.appendChild(scroll);
-}
-
-document.getElementById("album-select").addEventListener("change", renderPriceExplorer);
-// /* ============================================
-// 10. MAPLIBRE + OPENFREEMAP DARK
-// API-key-free map with clickable store pins.
-// ============================================ */
-const map = new maplibregl.Map({
-  container: "map",
-  style: "https://tiles.openfreemap.org/styles/dark",
-  center: [-73.98, 40.73],
-  zoom: 11.5,
-  minZoom: 11,
-  maxZoom: 18,
-  scrollZoom: false
 });
-
-const markers = new Map();
-stores.forEach((store, index) => {
-  const pin = document.createElement("div");
-  pin.className = "pin";
-  pin.title = store.name;
-  pin.setAttribute("role", "button");
-  pin.setAttribute("tabindex", "0");
-  pin.setAttribute("aria-label", `Show ${store.name} on the map`);
-  pin.addEventListener("click", () => showStore(index));
-  pin.addEventListener("keydown", event => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      showStore(index);
-    }
-  });
-  const marker = new maplibregl.Marker({ element: pin, anchor: "center" })
-    .setLngLat([store.coordinates[1], store.coordinates[0]])
-    .addTo(map);
-  markers.set(index, marker);
-});
-
-const storeBounds = new maplibregl.LngLatBounds();
-stores.forEach(store => storeBounds.extend([store.coordinates[1], store.coordinates[0]]));
-map.on("load", () => {
-  map.fitBounds(storeBounds, { padding: 45, maxZoom: 14, duration: 0 });
-  map.resize();
-});
-
-// Changes the appearance of map pins when filters change.
-function refreshMarkers() {
-  markers.forEach((marker, index) => {
-    let dimmed = false;
-    if (selectedAlbum !== null) {
-      const album = albumData.get(selectedAlbum);
-      dimmed = album
-        ? !album.storeIndices.has(index) && selectedStoreIndex !== index
-        : false;
-    }
-    const active = selectedStoreIndex === index;
-    const pin = marker.getElement();
-    pin.classList.toggle("active", active);
-    pin.classList.toggle("dimmed", dimmed);
-    pin.style.zIndex = active ? "1000" : "1";
-  });
-}
-// /** Refreshes the map status message.
-
-// Updates the message about what the map is showing.
-function updateMapStatus() {
-  if (selectedAlbum === null) {
-    document.getElementById("status").textContent =
-      "Click any of the 13 store pins to explore.";
+function updateStoreStatus() {
+  const status = document.getElementById("status");
+  if (!status) return;
+  if (!selectedAlbum) {
+    status.textContent = "Select a store or click a vinyl segment to view its inventory.";
     return;
   }
-
   const album = albumData.get(selectedAlbum);
-  const count = album?.storeIndices.size ?? 0;
-
-  document.getElementById("status").textContent =
-    `${selectedAlbum}: found at ${count} ` +
-    `of ${stores.length} stores. ` +
-    "Click a pin to view its store details.";
+  status.textContent = `${displayAlbumName(selectedAlbum)}: found at ${album?.storeIndices.size ?? 0} of ${stores.length} stores.`;
 }
-// /** Applies an album filter across linked views.
 
-// Filters the website to the album someone selected.
 function selectAlbum(title) {
   selectedAlbum = title;
-  // Restore the original floating Spotify player for every album selection.
+  const albumPicker = document.getElementById("album-select");
+  if (albumPicker && [...albumPicker.options].some(option => option.value === title)) albumPicker.value = title;
   playAlbumMusic(title);
   selectedStoreIndex = null;
 
   closePanelOnly();
-  refreshMarkers();
+  updateStoreStatus();
   renderWall();
-  updateMapStatus();
 
-  const album = albumData.get(title);
-  const count = album?.storeIndices.size ?? 0;
-
-  const feedback = document.getElementById("chart-feedback");
-  feedback.replaceChildren();
-
-  if (count === 0) {
-    feedback.textContent =
-      "";
-  } else {
-    feedback.appendChild(
-      document.createTextNode(
-        `${title}: found at ${count} stores. `
-      )
-    );
-
-    const button = element(
-      "button",
-      "text-link",
-      "Explore on the map →"
-    );
-
-    button.type = "button";
-
-    button.addEventListener("click", () => {
-      scrollToPinnedChapter(1);
-    });
-
-    feedback.appendChild(button);
-  }
+  document.getElementById("chart-feedback").textContent = "";
 
   document.getElementById("clear-filter").hidden = false;
 }
-// /** Resets the active album filter.
-// Filters the displayed results. set of instructions: clearAlbumFilter.
-// Removes the selected album filter.
 function clearAlbumFilter() {
   selectedAlbum = null;
   vinylFocusedStore = "all";
 
-  document.getElementById("chart-feedback").textContent =
-    "Click an album to explore.";
+  document.getElementById("chart-feedback").textContent = "";
 
   document.getElementById("clear-filter").hidden = true;
 
   renderWall();
-  refreshMarkers();
-  updateMapStatus();
 }
 
 document.getElementById("clear-filter").addEventListener(
   "click",
   clearAlbumFilter
 );
-// /* ============================================
-// 11. STORE INFORMATION PANEL
-// ============================================ */
 
 const panel = document.getElementById("panel");
-// /** Renders a selected store’s details in the side panel.
-// Opens the information panel for a record store.
 function showStore(index) {
   if (index < 0 || index >= stores.length) {
     return;
   }
 
   selectedStoreIndex = index;
+  document.getElementById("store-picker").value = String(index);
+  vinylFocusedStore = String(index);
+  document.querySelectorAll(".vinyl-store-name").forEach((label, i) => {
+    label.setAttribute("fill", i === index ? "#ffe5a0" : "#f7f3ef");
+    label.setAttribute("aria-pressed", i === index ? "true" : "false");
+  });
 
   const store = stores[index];
+  updateVinylPricePanel(selectedAlbum || null, index);
 
   document.getElementById("counter").textContent =
     `STORE ${String(index + 1).padStart(2, "0")}` +
@@ -1318,12 +1136,6 @@ function showStore(index) {
     "false"
   );
 
-  refreshMarkers();
-  updateMapStory();
-
-  // The selected pin is centered in the fully visible map; no overlay offset.
-  const marker = markers.get(index);
-  if (marker) map.easeTo({center: marker.getLngLat(), duration: 500});
   const extra = document.getElementById("store-extra");
   const toggle = document.getElementById("toggle-store-details");
   if (extra && toggle) {
@@ -1332,9 +1144,6 @@ function showStore(index) {
     toggle.textContent = "View full store inventory ↓";
   }
 }
-// /** Closes the store panel without resetting other state.
-// Closes the related panel or item. set of instructions: closePanelOnly.
-// Hides the store details panel.
 function closePanelOnly() {
   panel.classList.remove("open");
 
@@ -1343,15 +1152,24 @@ function closePanelOnly() {
     "true"
   );
 }
-// /** Closes store details and updates selection state.
-// Closes the related panel or item. set of instructions: closeStore.
-// Closes store details and resets the selection.
 function closeStore() {
   selectedStoreIndex = null;
+  document.getElementById("store-picker").value = "";
 
   closePanelOnly();
-  refreshMarkers();
 }
+
+const storePicker = document.getElementById("store-picker");
+stores.forEach((store, index) => {
+  const option = document.createElement("option");
+  option.value = String(index);
+  option.textContent = store.name;
+  storePicker.append(option);
+});
+storePicker.addEventListener("change", () => {
+  if (storePicker.value === "") closeStore();
+  else showStore(Number(storePicker.value));
+});
 
 document.getElementById("close").addEventListener(
   "click",
@@ -1381,20 +1199,10 @@ document.getElementById("next").addEventListener(
     }
   }
 );
-// /** Opens and focuses a store in the map interface.
-
-// Moves the map to a selected store.
-function openStoreOnMap(index) {
+function openStoreDetails(index) {
   scrollToPinnedChapter(1);
-
-  map.resize();
   showStore(index);
 }
-// /* ============================================
-// 12. SPOTIFY ALBUM PLAYER
-// Paste official Spotify album IDs below
-// to enable the other album players.
-// ============================================ */
 
 const spotifyAlbumIds = {
   "Taylor Swift (Debut)": "<iframe data-testid=\"embed-iframe\" style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/album/7mzrIsaAjnXihW3InKjlC3?utm_source=generator&si=fc62660f01e44fd4\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>",
@@ -1414,8 +1222,6 @@ const spotifyAlbumIds = {
   "TTPD": "<iframe data-testid=\"embed-iframe\" style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/album/5H7ixXZfsNMGbIE5OBSpcb?utm_source=generator&si=c1658db6a0934c71\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>",
   "Life of a Showgirl": "<iframe data-testid=\"embed-iframe\" style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/album/4hF2gTGuPYlykYuphDxi8J?utm_source=generator&si=bbacc4a261894904\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>"
 };
-// /** Extracts a Spotify album identifier from a supplied value.
-// Gets the album ID from a Spotify link or value.
 function extractSpotifyAlbumId(value) {
   if (typeof value !== "string") {
     return null;
@@ -1433,8 +1239,6 @@ function extractSpotifyAlbumId(value) {
 
   return match ? match[1] : null;
 }
-// /** Loads the selected album’s Spotify embed in the floating player.
-// Opens the Spotify player for the chosen album.
 function playAlbumMusic(title) {
   const player = document.getElementById("album-music");
   const iframe = document.getElementById("album-spotify");
@@ -1443,9 +1247,14 @@ function playAlbumMusic(title) {
     spotifyAlbumIds[title]
   );
 
-  document.getElementById("music-album-name").textContent = title;
+  document.getElementById("music-album-name").textContent = displayAlbumName(title);
 
   player.hidden = false;
+  player.classList.remove("is-minimized");
+  const minimizeButton = document.getElementById("minimize-music");
+  minimizeButton.textContent = "−";
+  minimizeButton.setAttribute("aria-expanded", "true");
+  minimizeButton.setAttribute("aria-label", "Minimize Spotify player");
 
   if (!id) {
     iframe.src = "about:blank";
@@ -1466,15 +1275,41 @@ function playAlbumMusic(title) {
   document.getElementById("music-note").textContent =
     "Press Play in the Spotify player.";
 }
-// /** Hides and clears the floating Spotify player.
-// Closes the related panel or item. set of instructions: closeMusicPlayer.
-// Closes the Spotify player.
 function closeMusicPlayer() {
   document.getElementById("album-music").hidden = true;
 
   document.getElementById("album-spotify").src = "about:blank";
   document.getElementById("album-spotify").hidden = true;
 }
+
+const spotifyWindow = document.getElementById("album-music");
+const spotifyHeader = spotifyWindow.querySelector(".music-header");
+const spotifyMinimize = document.getElementById("minimize-music");
+spotifyMinimize.addEventListener("click", () => {
+  const minimized = spotifyWindow.classList.toggle("is-minimized");
+  spotifyMinimize.textContent = minimized ? "+" : "−";
+  spotifyMinimize.setAttribute("aria-expanded", String(!minimized));
+  spotifyMinimize.setAttribute("aria-label", minimized ? "Expand Spotify player" : "Minimize Spotify player");
+});
+
+let spotifyDrag = null;
+spotifyHeader.addEventListener("pointerdown", event => {
+  if (event.button !== 0 || event.target.closest("button")) return;
+  const rect = spotifyWindow.getBoundingClientRect();
+  spotifyDrag = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  spotifyHeader.setPointerCapture(event.pointerId);
+});
+spotifyHeader.addEventListener("pointermove", event => {
+  if (!spotifyDrag) return;
+  const rect = spotifyWindow.getBoundingClientRect();
+  const x = Math.max(0, Math.min(innerWidth - rect.width, event.clientX - spotifyDrag.x));
+  const y = Math.max(0, Math.min(innerHeight - rect.height, event.clientY - spotifyDrag.y));
+  spotifyWindow.style.left = `${x}px`;
+  spotifyWindow.style.top = `${y}px`;
+});
+function endSpotifyDrag() { spotifyDrag = null; }
+spotifyHeader.addEventListener("pointerup", endSpotifyDrag);
+spotifyHeader.addEventListener("pointercancel", endSpotifyDrag);
 
 document.getElementById("close-music").addEventListener(
   "click",
@@ -1489,11 +1324,6 @@ document.addEventListener(
     }
   }
 );
-// /* ============================================
-// 13. ORIGINAL PRICE COMPARISON
-// ============================================ */
-// /** Builds a single comparison bar for the retail chart.
-// Adds a bar to the price comparison chart.
 function addComparisonBar(
   container,
   label,
@@ -1537,10 +1367,6 @@ function addComparisonBar(
 
   container.appendChild(row);
 }
-// /** Renders the observed-versus-reference price comparisons.
-// /* ============================================
-// 14. OPENING SCROLL SEQUENCE
-// ============================================ */
 
 const scrolly = document.querySelector(
   ".scrolly"
@@ -1551,9 +1377,6 @@ const steps = [
     ".scrolly .step"
   )
 ];
-// /** Updates the introductory scroll-driven narrative.
-// Updates the page based on scrolling. set of instructions: updateOpeningScroll.
-// Changes the opening story as the visitor scrolls.
 function updateOpeningScroll() {
   if (!scrolly || !steps.length) {
     return;
@@ -1586,91 +1409,13 @@ function updateOpeningScroll() {
     );
   });
 }
-// /* ============================================
-// 15. REPUTATION NEWSPAPER INVESTIGATION
-// Self-contained: does not touch inventory, charts, or map.
-// ============================================ */
 
-const repEvidenceFiles = {
-  masters: {
-    title: "Who owns the masters?",
-
-    body: `
-      <p>Swift began rerecording her first six albums after Scooter Braun bought Big Machine Label Group in 2019 which included her catalog. In 2020, Braun sold the master rights to Shamrock Holdings for $405 million. In May 2025, she announced that she had purchased her masters from Shamrock Capital for around $360 million, including <em>Reputation</em>.</p>
-      <p>Four of those albums received Taylor's Version releases. <em>Reputation (Taylor's Version)</em> had not been released at the time of this investigation. This history is important context, but it does <strong>not</strong> establish why the original record was absent from the 13 stores surveyed.</p>
-      <figure><img src="masters-announcement.png" alt="Swift seated among the covers of her first six albums" loading="lazy"><figcaption>Swift's May 2025 masters announcement.</figcaption></figure>
-      <p><a href="https://www.taylorswift.com/" target="_blank" rel="noopener noreferrer">Source: Taylor Swift's official website</a></p>`
-  },
-  personal: {
-    title: "Too personal to revisit?",
-  
-    body: `
-      <p>In a May 2025 letter, Swift said she had rerecorded less than a quarter of <em>Reputation</em>. She described the album as a reminder to a particular time in her life and said she had struggled to remake it.</p>
-      <p>Some fans connect that difficulty to her former relationship with Joe Alwyn as 10 out of the 15 songs on Reputation are supposedly about Alwyn. <strong>That is a fan interpretation, not a reason Swift confirmed.</strong> She also did not say she would never release the remaining material.</p>
-      <figure><img src="reputation-letter.png" alt="Taylor Swift's handwritten letter discussing the status of Reputation Taylor's Version" loading="lazy"><figcaption>Her own words are the strongest evidence; claims about Joe remain unverified.</figcaption></figure>
-      <p><a href="https://www.taylorswift.com/" target="_blank" rel="noopener noreferrer">Source: Swift's May 2025 letter</a></p>`
-  },
-  factory: {
-    title: "Reputation Pressing",
-
-    body: `
-      <p>The 2017 vinyl edition was a double LP picture disc. Both of the records have printed photographic artwork, and they aren’t the usual solid color vinyl records like her other vinyls.</p>
-      <p>The format is visually distinctive compared with many standard album pressings. The standard reputation picture disc has had subsequent pressings, including a documented 2024 pressing. However, a repress does not mean continuous availability. A record can be manufactured again but still be difficult to find if Retailers receive limited quantities or there are long gaps between production runs.</p>
-      <p><a href="https://www.upi.com/Top_News/US/2020/02/20/Vinyl-record-production-hurt-by-California-factory-fire/4601582093769/" target="_blank" rel="noopener noreferrer">Source: UPI's 2020 reporting on the Apollo Masters fire ↗</a></p>`
-  },
-  market: {
-    title: "Resellers",
-    
-    body: `
-      <p>The online market tells a different story from the physical shelves. In screenshots collected for this project, a used <em>Reputation</em> picture disc appeared on eBay for <strong>$205</strong>; Amazon marketplace offers were listed at <strong>$299.95–$324.99</strong>.</p>
-      <p class="rep-image-pending"><strong>Listing screenshots coming soon.</strong> eBay: $205 asking price; Amazon: $299.95–$324.99 asking prices.</p>
-      <p>Another retailer displayed a <strong>$44.99</strong> listing, but with a backorder estimate of 2–12 weeks. That is <strong>not</strong> evidence the record could ship immediately.</p>
-      <p class="rep-image-pending">Retail listing screenshot coming soon: $44.99, with a 2–12 week backorder estimate.</p>
-      <p>Prices must be compared across matching editions and conditions. These screenshots do not prove completed sales or establish a specific cause of the in-store shortage.</p>`
-  }
-};
-
-const repFileButtons = [...document.querySelectorAll("[data-rep-file]")];
-const repEvidenceTitle = document.getElementById("rep-evidence-title");
-const repEvidenceStatus = document.getElementById("rep-evidence-status");
-const repEvidenceBody = document.getElementById("rep-evidence-body");
-// /** Opens evidence associated with an investigation clipping.
-// Opens the related panel or item. set of instructions: openReputationFile.
-// Opens a selected piece of evidence in the investigation.
-function openReputationFile(key) {
-  const file = repEvidenceFiles[key];
-  if (!file || !repEvidenceTitle || !repEvidenceStatus || !repEvidenceBody) return;
-  repEvidenceTitle.textContent = file.title;
-  repEvidenceStatus.textContent = file.status;
-  repEvidenceBody.innerHTML = file.body;
-  repFileButtons.forEach(button => {
-    const isActive = button.dataset.repFile === key;
-    button.setAttribute("aria-expanded", String(isActive));
-    const stamp = button.querySelector(".rep-news-open");
-    if (stamp) stamp.textContent = isActive ? "Now reading ↗" : "Read the evidence ↗";
-  });
-  if (window.matchMedia("(max-width: 850px)").matches) {
-    const chapter = document.getElementById("reputation-investigation");
-    const panel = document.getElementById("rep-evidence");
-    if(chapter && panel) chapter.scrollTo({top:panel.offsetTop - chapter.offsetTop - 35,behavior:"smooth"});
-  }
-}
-repFileButtons.forEach(button => {
-  button.addEventListener("click", () => openReputationFile(button.dataset.repFile));
-});
-// /** Coordinates opening narrative updates on scroll/resize.
-// Updates the page based on scrolling. set of instructions: updateScrollSections.
-// Updates the animated story sections while scrolling.
 function updateScrollSections() {
   updateOpeningScroll();
 }
 window.addEventListener("scroll", updateScrollSections, {passive: true});
 window.addEventListener("resize", updateScrollSections);
 updateScrollSections();
-// duplicate scroll/resize listeners. The original handlers above remain active. */
-// /* ============================================
-// 16. FADE-IN ANIMATIONS
-// ============================================ */
 
 const fadeElements = [
   ...document.querySelectorAll(".fade")
@@ -1703,14 +1448,8 @@ if ("IntersectionObserver" in window) {
     node.classList.add("visible");
   });
 }
-// /* ============================================
-// 17. LOAD BOTH spreadsheet-style data file FILES
-// ============================================ */
-// /** Loads datasets and initializes the website’s clickable or changeable features.
-// Loads the data and starts the interactive parts of the website.
 async function initializeWebsite() {
-  document.getElementById("status").textContent =
-    "Loading store inventory...";
+  updateStoreStatus();
 
   try {
     const [inventoryRows, originalPriceRows] =
@@ -1724,11 +1463,9 @@ loadCSV("./original_price.csv")
 
     renderWall();
     populateAlbumSelect();
+    document.getElementById("album-select").value = [...document.getElementById("album-select").options].some(o=>o.value==="Reputation") ? "Reputation" : document.getElementById("album-select").value;
     renderPriceExplorer();
-    // Retail comparison now appears in the integrated price dumbbell chart.
-
-    refreshMarkers();
-    updateMapStatus();
+    updateStoreStatus();
 
     console.log(
       "Inventory CSV rows:",
@@ -1746,31 +1483,15 @@ loadCSV("./original_price.csv")
       error
     );
 
-    document.getElementById("status").textContent =
-      "Could not load CSV files. " +
-      "Check filenames and use Live Server.";
+    document.getElementById("status").textContent = "Could not load CSV files. Check filenames and use Live Server.";
 
     document.getElementById("chart-feedback").textContent =
       "Data failed to load. " +
-      "Check the browser console.";
+      (error && error.message ? error.message : "Check the browser console.");
   }
 }
 
 initializeWebsite();
-window.addEventListener(
-  "resize",
-  () => {
-    map.resize();
-  }
-);
-window.addEventListener(
-  "load",
-  () => {
-    map.resize();
-  }
-);
-// /* One actual pinned visible screen area, with the existing clickable or changeable sections as scenes.
-// Scrolling advances scenes in place. Scroll inside a long website section to explore it. */
 (function(){
  const root=document.getElementById('pinned-story');
  if(!root)return;
@@ -1786,12 +1507,7 @@ window.addEventListener(
      s.setAttribute('aria-hidden',String(!on));
      if('inert' in s)s.inert=!on;
    });
-   if(i===1 && typeof map!=='undefined')setTimeout(()=>{
-      map.resize();
-      map.scrollZoom.disable();
-    },80);
  }
- // Refreshes the related page content or state. set of instructions: update.
  function update(){
    pending=false;
    const rect=root.getBoundingClientRect();
@@ -1816,7 +1532,6 @@ window.addEventListener(
  window.addEventListener('scroll',schedule,{passive:true});
  window.addEventListener('resize',schedule);
 
- // When the map or price links jump between website sections, activate target and scroll
  document.addEventListener('click',e=>{
    const link=e.target.closest('a[href^="#"]');
    if(!link)return;
@@ -1832,9 +1547,6 @@ window.addEventListener(
  });
  update();
 })();
-// /** Scrolls the document to the requested pinned website section.
-// Updates the page based on scrolling. set of instructions: scrollToPinnedChapter.
-// Scrolls to the chosen chapter of the story.
 function scrollToPinnedChapter(i){
  const root=document.getElementById('pinned-story');
  if(!root)return;
@@ -1842,49 +1554,6 @@ function scrollToPinnedChapter(i){
   Math.max(0,root.offsetHeight-window.innerHeight)*(i+.05)/document.querySelectorAll("#pinned-story .pinned-chapter").length;
  window.scrollTo({top:y,behavior:'smooth'});
 }
-// /* Evidence-board string movement effect, driven by scroll within the investigation website section.
-// All four clippings remain clickable at any scroll position. */
-(function(){
- const chapter=document.getElementById('reputation-investigation');
- const track=document.querySelector('.crime-scroll-track');
- const board=document.getElementById('crime-board');
- if(!chapter||!track||!board)return;
- const paths=[...board.querySelectorAll('.crime-string')];
- const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- let raf=0;
- // Refreshes the related page content or state. set of instructions: update.
- function update(){
-   raf=0;
-   const trackTop=track.offsetTop;
-   const travel=Math.max(1,track.offsetHeight-board.offsetHeight);
-   const p=Math.max(0,Math.min(1,(chapter.scrollTop-trackTop)/travel));
-   paths.forEach((path,i)=>{
-     const start=i*.19;
-     const t=reduceMotion?1:Math.max(0,Math.min(1,(p-start)/.24));
-     path.style.opacity=String(0.7 + 0.3*t);
-   });
- }
- function request(){if(!raf)raf=requestAnimationFrame(update)}
- chapter.addEventListener('scroll',request,{passive:true});
- window.addEventListener('resize',request);
- board.querySelectorAll('[data-rep-file]').forEach(button=>{
-   button.addEventListener('click',()=>{
-     const key=button.dataset.repFile;
-     paths.forEach(path=>path.classList.toggle('is-selected',path.dataset.string===key));
-   });
- });
- document.querySelector('.crime-close')?.addEventListener('click',()=>{
-   const evidence=document.getElementById('rep-evidence');
-   if(evidence)evidence.hidden=true;
-   chapter.scrollTo({top:track.offsetTop,behavior:'smooth'});
- });
- board.querySelectorAll('[data-rep-file]').forEach(button=>button.addEventListener('click',()=>{
-   const evidence=document.getElementById('rep-evidence');
-   if(evidence)evidence.hidden=false;
- }));
- update();
-})();
-// /* The compact store card expands only if the visitor asks for full inventory. */
 const storeDetailsToggle = document.getElementById("toggle-store-details");
 if (storeDetailsToggle) storeDetailsToggle.addEventListener("click", () => {
   const extra = document.getElementById("store-extra");
@@ -1892,51 +1561,4 @@ if (storeDetailsToggle) storeDetailsToggle.addEventListener("click", () => {
   storeDetailsToggle.setAttribute("aria-expanded", String(!extra.hidden));
   storeDetailsToggle.textContent = extra.hidden ? "View full store inventory ↓" : "Hide full store inventory ↑";
 });
-
-
-// Move the Spotify popup by dragging its title bar. The close button and
-// embedded Spotify controls remain independently clickable.
-(function enableDraggableSpotifyPlayer() {
-  const player = document.getElementById("album-music");
-  const header = player && player.querySelector(".music-header");
-  if (!player || !header) return;
-
-  let drag = null;
-  const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
-  function keepInView() {
-    if (player.hidden || !player.classList.contains("is-draggable")) return;
-    const rect = player.getBoundingClientRect();
-    player.style.left = clamp(rect.left, 0, Math.max(0, innerWidth - rect.width)) + "px";
-    player.style.top = clamp(rect.top, 0, Math.max(0, innerHeight - rect.height)) + "px";
-  }
-  header.addEventListener("pointerdown", event => {
-    if (event.button !== 0 || event.target.closest("button, a, input")) return;
-    const rect = player.getBoundingClientRect();
-    drag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top };
-    player.classList.add("is-draggable");
-    player.style.left = rect.left + "px";
-    player.style.top = rect.top + "px";
-    header.classList.add("is-dragging");
-    header.setPointerCapture(event.pointerId);
-    event.preventDefault();
-  });
-  header.addEventListener("pointermove", event => {
-    if (!drag || event.pointerId !== drag.id) return;
-    const width = player.getBoundingClientRect().width;
-    const height = player.getBoundingClientRect().height;
-    player.style.left = clamp(event.clientX - drag.dx, 0, Math.max(0, innerWidth - width)) + "px";
-    player.style.top = clamp(event.clientY - drag.dy, 0, Math.max(0, innerHeight - height)) + "px";
-  });
-  function endDrag(event) {
-    if (!drag || event.pointerId !== drag.id) return;
-    drag = null;
-    header.classList.remove("is-dragging");
-    if (header.hasPointerCapture(event.pointerId)) header.releasePointerCapture(event.pointerId);
-  }
-  header.addEventListener("pointerup", endDrag);
-  header.addEventListener("pointercancel", endDrag);
-  window.addEventListener("resize", keepInView);
-})();
-
-
 
