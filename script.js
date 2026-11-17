@@ -3,6 +3,15 @@
 
 
 
+
+
+
+
+
+
+
+
+
 "use strict";
 const money = value =>
   "$" + Number(value).toFixed(2);
@@ -12,12 +21,12 @@ function element(tag, className = "", text = "") {
   node.textContent = text;
   return node;
 }
+// tell me how to add the record store names, addresses, and neighborhoods
 const stores = [
   {
     name: "Village Revival Records",
     address: "197 Bleecker St, New York, NY",
     neighborhood: "Greenwich Village",
-    coordinates: [40.72962942870095, -74.00146147482866],
     albums: [],
     reputationCopies: 0
   },
@@ -25,7 +34,6 @@ const stores = [
     name: "Generation Records",
     address: "210 Thompson St, New York, NY",
     neighborhood: "Greenwich Village",
-    coordinates: [40.72903986087924, -73.99914150551176],
     albums: [],
     reputationCopies: 0
   },
@@ -33,7 +41,6 @@ const stores = [
     name: "Stranded Records",
     address: "218 E 5th St, New York, NY",
     neighborhood: "East Village",
-    coordinates: [40.72732972088685, -73.99036100795793],
     albums: [],
     reputationCopies: 0
   },
@@ -41,7 +48,6 @@ const stores = [
     name: "A-1 Record Shop",
     address: "439 E 6th St, New York, NY",
     neighborhood: "East Village",
-    coordinates: [40.725860293647564, -73.9844525943435],
     albums: [],
     reputationCopies: 0
   },
@@ -49,7 +55,6 @@ const stores = [
     name: "Limited to One Records",
     address: "221 E 10th St, New York, NY",
     neighborhood: "East Village",
-    coordinates: [40.72955592755726, -73.98551773735012],
     albums: [],
     reputationCopies: 0
   },
@@ -57,7 +62,6 @@ const stores = [
     name: "Academy Records & CDs",
     address: "12 W 18th St, New York, NY",
     neighborhood: "Flatiron",
-    coordinates: [40.738988100111094, -73.99297221715723],
     albums: [],
     reputationCopies: 0
   },
@@ -65,7 +69,6 @@ const stores = [
     name: "Barnes & Noble — Union Square",
     address: "33 E 17th St, New York, NY",
     neighborhood: "Union Square",
-    coordinates: [40.73717110566222, -73.98975309016971],
     albums: [],
     reputationCopies: 0
   },
@@ -73,7 +76,6 @@ const stores = [
     name: "Barnes & Noble — Fifth Avenue",
     address: "555 Fifth Ave, New York, NY",
     neighborhood: "Midtown",
-    coordinates: [40.755904040053466, -73.97898187667485],
     albums: [],
     reputationCopies: 0
   },
@@ -81,7 +83,6 @@ const stores = [
     name: "Urban Outfitters — Fifth Avenue",
     address: "521 Fifth Ave, New York, NY",
     neighborhood: "Midtown",
-    coordinates: [40.75429391690126, -73.97989333249825],
     albums: [],
     reputationCopies: 0
   },
@@ -89,7 +90,6 @@ const stores = [
     name: "Rough Trade Below",
     address: "30 Rockefeller Plaza, New York, NY",
     neighborhood: "Rockefeller Center",
-    coordinates: [40.759321799334046, -73.9795868829805],
     albums: [],
     reputationCopies: 0
   },
@@ -97,7 +97,6 @@ const stores = [
     name: "Rough Trade Above",
     address: "1250 Sixth Ave, New York, NY",
     neighborhood: "Rockefeller Center",
-    coordinates: [40.759914938236285, -73.98052847667482],
     albums: [],
     reputationCopies: 0
   },
@@ -105,7 +104,6 @@ const stores = [
     name: "Westsider Records",
     address: "233 W 72nd St, New York, NY",
     neighborhood: "Upper West Side",
-    coordinates: [40.779412095306384, -73.98272155705537],
     albums: [],
     reputationCopies: 0
   },
@@ -113,11 +111,11 @@ const stores = [
     name: "Barnes & Noble — Upper West Side",
     address: "2289 Broadway, New York, NY 10024",
     neighborhood: "Upper West Side",
-    coordinates: [40.786572256890594, -73.97870664232926],
     albums: [],
     reputationCopies: 0
   }
 ];
+//  make CSV names match even if it's different 
 function normalize(value) {
   return String(value ?? "")
     .toLowerCase()
@@ -127,6 +125,7 @@ function normalize(value) {
     .replace(/\s+/g, " ");
 }
 
+// make different spellings of store names in my CSV match the same store
 const storeAliases = {
   "village revival records": 0,
   "generation records": 1,
@@ -149,6 +148,7 @@ const storeAliases = {
 
   "barnes and noble upper west side": 12
 };
+// find the correct store when its name comes from my CSV
 function getStoreIndex(name) {
   const key = normalize(name);
 
@@ -160,6 +160,7 @@ function getStoreIndex(name) {
     : -1;
 }
 
+// tell me how to change which albums appear and what order they appear in
 const albumOrder = [
   "Taylor Swift (Debut)",
   "Fearless",
@@ -184,6 +185,7 @@ function displayAlbumName(name) {
     name === "Life of a Showgirl" ? "The Life of a Show girl" : name;
 }
 
+// tell me how to match alternate album titles from my CSV to the correct albums
 const albumAliases = {
   "taylor swift": "Taylor Swift (Debut)",
   "taylor swift debut": "Taylor Swift (Debut)",
@@ -216,12 +218,14 @@ const albumAliases = {
   "life of a showgirl": "Life of a Showgirl",
   "the life of a showgirl": "Life of a Showgirl"
 };
+// tell me how to recognize album names that are written differently in my CSV
 function normalizeAlbum(name) {
   const key = normalize(name);
 
   return albumAliases[key] ||
     String(name ?? "").trim();
 }
+// tell me how to read my CSV file even when some fields contain commas or quotation marks
 function parseCSV(text) {
   text = text.replace(/^\uFEFF/, "");
 
@@ -292,6 +296,7 @@ function parseCSV(text) {
     return result;
   });
 }
+// tell me how to load my CSV data into the website
 async function loadCSV(path) {
   const response = await fetch(path);
 
@@ -321,6 +326,7 @@ function getField(row, candidates) {
 
   return "";
 }
+// tell me how to convert prices from my CSV into numbers
 function parsePrice(value) {
   const cleaned = String(value ?? "")
     .replace(/[$,]/g, "")
@@ -346,6 +352,7 @@ let selectedAlbum = null;
 let selectedStoreIndex = null;
 
 let wallMode = "found";
+// tell me how to connect the store inventory CSV to albums, quantities, prices, and locations
 function processInventory(rows) {
   stores.forEach(store => {
     store.albums = [];
@@ -493,6 +500,7 @@ function processInventory(rows) {
     reputationCopies
   });
 }
+// tell me how to compare original album prices from my CSV with current store prices
 function processOriginalPrices(rows) {
   retailReferences = new Map();
   rows.forEach((row, index) => {
@@ -546,24 +554,8 @@ function processOriginalPrices(rows) {
     });
   });
 }
-const albumCoverFiles = {
-  "Taylor Swift (Debut)": "debut.png",
-  "Fearless": "fearless.png",
-  "Fearless (TV)": "fearless_tv.png",
-  "Speak Now": "speak_now.png",
-  "Speak Now (TV)": "speak_now_tv.png",
-  "Red": "red.png",
-  "Red (TV)": "red_tv.png",
-  "1989": "1989.png",
-  "1989 (TV)": "1989_TV.png",
-  "Reputation": "reputation.png",
-  "Lover": "lover.png",
-  "Folklore": "folklore.png",
-  "Evermore": "evermore.png",
-  "Midnights": "midnights.png",
-  "TTPD": "TTPD.png",
-  "Life of a Showgirl": "the_life_of_a_showgirl.png"
-};
+// tell me how to change the album cover images shown on the website
+
 let vinylFocusedStore = "all";
 
 function vinylArc(cx, cy, radius, start, end) {
@@ -571,6 +563,7 @@ function vinylArc(cx, cy, radius, start, end) {
   const a = point(start), b = point(end);
   return `M ${a[0]} ${a[1]} A ${radius} ${radius} 0 ${end-start > Math.PI ? 1 : 0} 1 ${b[0]} ${b[1]}`;
 }
+// tell me how to show album details and store availability when I select a vinyl record
 function showVinylDetails(title, storeIndex = null) {
   const album = albumData.get(title);
   if (!album) return;
@@ -622,6 +615,7 @@ function showVinylDetails(title, storeIndex = null) {
   });
 }
 
+// tell me how to change the colors of the rings for each album
 const vinylAlbumColors = {
   "Taylor Swift (Debut)": "#34F3FF",
   "Fearless": "#f6ed95",
@@ -641,6 +635,7 @@ const vinylAlbumColors = {
   "Life of a Showgirl": "#68F5BE",
 };
 
+// tell me how to show the selected album price for a specific record store
 function updateVinylPricePanel(albumTitle, storeIndex) {
   const pricePicker = document.getElementById("album-select");
   if (albumTitle && pricePicker && pricePicker.value !== albumTitle &&
@@ -678,16 +673,17 @@ function updateVinylPricePanel(albumTitle, storeIndex) {
   else addRow("Store price", "Not recorded");
 }
 
+// tell me how to make the vinyl ring visualization and its waves correlate with my CSV data
 function renderWall() {
   const container = document.getElementById("album-chart");
   const albums = [...albumData.values()].reverse();
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
   svg.classList.add("vinyl-rotating-disc");
-  const center = 650, outer = 530, spacing = 26; // Separate price waves and sparse stock ticks, with room between albums.
-  svg.setAttribute("viewBox", "0 0 1300 1300");
+  const center = 800, outer = 680, spacing = 34;
+  svg.setAttribute("viewBox", "0 0 1600 1600");
   svg.setAttribute("role", "group");
-  svg.setAttribute("aria-label", "Colored album sound-wave grooves divided into thirteen store slices, with price markers only for recorded CSV values");
+  svg.setAttribute("aria-label", "Colored album rings divided into store slices with retail and store price arcs proportional to CSV prices");
   const svgItem = (tag, attrs, parent = svg) => {
     const node = document.createElementNS(svgNS, tag);
     Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
@@ -720,14 +716,14 @@ function renderWall() {
     const isSelected = selectedStoreIndex === i;
     svgItem("path", {
       d:`M ${a.x} ${a.y} L ${b.x} ${b.y} A ${outer+19} ${outer+19} 0 0 1 ${c.x} ${c.y} L ${d.x} ${d.y} A 61 61 0 0 0 ${a.x} ${a.y} Z`,
-      fill: isSelected ? "#ffe5a0" : "#f5f0e9",
+      fill: isSelected ? "#ff2020" : "#f5f0e9",
       "fill-opacity": isSelected ? .095 : (i % 2 === 0 ? .035 : .008),
       "pointer-events":"none"
     });
     const from = polar(61, start);
     const to = polar(outer + 19, start);
     const divider = svgItem("line", {x1:from.x,y1:from.y,x2:to.x,y2:to.y,
-      stroke: isSelected ? "#ffe5a0" : "#d7d4dc",
+      stroke: isSelected ? "#ff2020" : "#d7d4dc",
       "stroke-width":isSelected ? 2.2 : 1.4,
       "stroke-opacity":isSelected ? .88 : .53,
       "pointer-events":"none"});
@@ -764,8 +760,8 @@ function renderWall() {
       d:`M ${first.x} ${first.y} A ${radius} ${radius} 0 0 ${bottom ? 0 : 1} ${last.x} ${last.y}`,
       fill:"none",stroke:"none"}, labelsGroup);
     const label = svgItem("text", {
-      fill: selectedStoreIndex === i ? "#ffe5a0" : "#f7f3ef",
-      "font-size":12,"font-weight":650,
+      fill: selectedStoreIndex === i ? "#ff2020" : "#f7f3ef",
+      "font-size":17,"font-weight":650,
       "letter-spacing":"0.15", "text-anchor":"middle",
       "paint-order":"stroke",stroke:"#08090d","stroke-width":3,
       "stroke-linejoin":"round", "pointer-events":"visiblePainted",
@@ -804,7 +800,7 @@ function renderWall() {
     const albumPeakDifference = hasRetail
       ? Math.max(0, ...album.listings.filter(row => Number.isFinite(row.price)).map(row => Math.abs(row.price - retail)))
       : 0;
-    const albumAmplitude = 1.2 + 8.5 * Math.sqrt(albumPeakDifference / maxSpread);
+    const waveAmplitude = difference => difference <= 0 ? 0 : 2 + 13.5 * Math.pow(Math.min(1, difference / maxSpread), 1.5);
     stores.forEach((store, storeIndex) => {
       const listings = album.listings.filter(row => row.storeIndex === storeIndex);
       const copies = listings.reduce((sum, row) => sum + (row.quantity || 0), 0);
@@ -817,29 +813,61 @@ function renderWall() {
         ? Math.max(...prices.map(p => Math.abs(p - retail))) : 0;
       const hasPriceComparison = hasStock && hasRetail && prices.length > 0;
       const amplitude = hasPriceComparison
-        ? 1.2 + 8.5 * Math.sqrt(storeSpread / maxSpread)
-        : albumAmplitude;
+        ? waveAmplitude(storeSpread)
+        : 0;
       const inFocus = vinylFocusedStore === "all" || Number(vinylFocusedStore) === storeIndex;
-      const opacity = 1; // Keep every album vivid, even when another store or album is selected.
+      const opacity = 1;
       const startAngle = -Math.PI / 2 + storeIndex * storeAngle;
-      const samples = 96;
-      const pointedSine = t => {
-        const sine = Math.sin(2 * Math.PI * t);
-        return Math.sign(sine) * Math.pow(Math.abs(sine), 6);
-      };
-      const waveRadius = t => radius - amplitude * pointedSine(t);
-      const commands = [];
-      for (let i = 0; i <= samples; i++) {
-        const t = i / samples;
-        const pos = polar(waveRadius(t), startAngle + storeAngle * t);
-        commands.push(`${i ? "L" : "M"}${pos.x.toFixed(2)} ${pos.y.toFixed(2)}`);
+      // Every store section has a solid album-colored groove.
+      // Available records add price-sized circles along that SAME groove.
+      const gap = 0.008;
+      const arcStart = startAngle + gap;
+      const arcEnd = startAngle + storeAngle - gap;
+      const storePrice = prices.length ? Math.min(...prices) : null;
+      const totalPrice = hasPriceComparison ? retail + storePrice : 0;
+      const baseArc = svgItem("path", {
+        d: vinylArc(center, center, radius, arcStart, arcEnd),
+        fill: "none", stroke: color, "stroke-width": 2.5,
+        "stroke-linecap": "butt", "pointer-events": "none"
+      });
+      svgItem("title", {}, baseArc).textContent =
+        `${album.title} • ${store.name} • ${hasStock ? "in stock" : "not available"}`;
+
+      if (hasPriceComparison && totalPrice > 0) {
+        // Lengths: retail / (retail + store), store / (retail + store).
+        const split = arcStart + (arcEnd - arcStart) * (retail / totalPrice);
+        // Every price circle has the same diameter. The number of circles
+        // is proportional to the CSV price, using one circle per $2.50.
+        // A physical-space cap prevents overlap on small inner grooves.
+        const circleDiameter = 7;
+        const dollarsPerCircle = 2.5;
+        const minimumCenterSpacing = 8;
+        const drawPriceCircles = (from, to, price, isRetail) => {
+          const arcLength = radius * (to - from);
+          const priceCount = Math.max(1, Math.round(price / dollarsPerCircle));
+          const capacity = Math.max(1, Math.floor(arcLength / minimumCenterSpacing));
+          const count = Math.min(priceCount, capacity);
+          const change = (storePrice - retail) / retail * 100;
+          const changeLabel = `${change >= 0 ? "+" : ""}${change.toFixed(1)}% vs retail`;
+          for (let i = 0; i < count; i++) {
+            const angle = from + (i + .5) / count * (to - from);
+            const point = polar(radius, angle);
+            const circle = svgItem("circle", {
+              cx: point.x, cy: point.y,
+              r: circleDiameter / 2,
+              fill: color,
+              stroke: isRetail ? "#FF1493" : "none",
+              "stroke-width": isRetail ? 2.5 : 0,
+              "pointer-events": "none"
+            });
+            svgItem("title", {}, circle).textContent =
+              `${album.title} • ${store.name} • ${isRetail ? "Original retail" : "Lowest store price"}: ${money(price)} • ${changeLabel} • ${count} circles`;
+          }
+        };
+        drawPriceCircles(arcStart, split, retail, true);
+        drawPriceCircles(split, arcEnd, storePrice, false);
       }
-      const wave = svgItem("path", {d: commands.join(" "), fill: "none", stroke: color,
-        "stroke-width": 3.5, "stroke-opacity": 1,
-        "stroke-dasharray": hasPriceComparison ? "none" : "4 6",
-        "stroke-linecap": "round", "stroke-linejoin": "round",
-        style: "filter: drop-shadow(0 0 3px " + color + ");", "pointer-events": "none"});
-      svgItem("title", {}, wave).textContent = `${album.title} at ${store.name}: ${hasPriceComparison ? "observed price comparison" : "no comparable store price"}`;
+      // Unavailable / unpriced sections remain plain solid lines, no circles.
 
       if (hasStock) {
         const visibleTicks = Math.min(copies, 8);
@@ -865,29 +893,7 @@ function renderWall() {
       const choose = () => {selectAlbum(album.title);vinylFocusedStore=String(storeIndex);renderWall();showVinylDetails(album.title,storeIndex);showStore(storeIndex);updateVinylPricePanel(album.title,storeIndex);};
       hit.addEventListener("click",choose);
       hit.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();choose();}});
-      if (hasPriceComparison) {
-        const observedPrices = [...new Set(prices)].sort((a, b) => a - b);
-        const markers = [
-          {label: "Original retail price (CSV)", price: retail, isRetail: true},
-          ...observedPrices.map(price => ({
-            label: "Observed store price (CSV)", price, isRetail: false
-          }))
-        ];
-        markers.forEach((mark, i) => {
-          const t = .14 + .72 * (i + .5) / markers.length;
-          const angle = startAngle + storeAngle * t;
-          const pos = polar(waveRadius(t), angle);
-          const dot = svgItem("circle", {
-            cx: pos.x, cy: pos.y, r: mark.isRetail ? 4.8 : 4.3,
-            fill: mark.isRetail ? "#fff" : color,
-            stroke: "#09090d", "stroke-width": 1.1,
-            "fill-opacity": Math.max(.85, opacity), role: "img", tabindex: 0,
-            "aria-label": `${album.title}, ${store.name}, ${mark.label}: ${money(mark.price)}`
-          });
-          svgItem("title", {}, dot).textContent = `${album.title} • ${store.name}\n${mark.label}: ${money(mark.price)}\n${copies} copies recorded`;
-          dot.addEventListener("click", choose);
-        });
-      }
+
     });
   });
   const recordCircle = (radius, fill, stroke = "none", strokeWidth = 0) => {
@@ -925,7 +931,7 @@ function renderWall() {
   };
   centerText("33⅓ RPM", center - 56, "15", "bold", "#54473d", "1.2");
   centerText("TAYLOR SWIFT", center - 25, "18", "bold", "#24201e", ".8");
-  centerText("VINYL ARCHIVE", center + 49, "15", "bold", "#54473d", "1");
+  centerText("VINYL DATA", center + 49, "15", "bold", "#54473d", "1");
   centerText("NYC · 13 STORES", center + 66, "12", "normal", "#54473d", ".5");
   recordCircle(10, "#171717", "#847969", 2);
   recordCircle(2.5, "#080808");
@@ -957,6 +963,7 @@ function populateAlbumSelect() {
     select.value = "Fearless (TV)";
   }
 }
+// tell me how to make an interactive price comparison chart using my album data
 function renderPriceExplorer() {
   const title = document.getElementById("album-select").value;
   const album = albumData.get(title);
@@ -969,9 +976,9 @@ function renderPriceExplorer() {
   document.getElementById("retail-price").textContent = reference ? money(reference.price) : "Not recorded";
   document.getElementById("lowest-price").textContent = lowest === null ? "Not found" : money(lowest);
   document.getElementById("highest-price").textContent = highest === null ? "Not found" : money(highest);
-  document.getElementById("price-difference").textContent = reference && lowest !== null
-    ? (lowest < reference.price ? money(reference.price-lowest)+" below retail" :
-       lowest > reference.price ? money(lowest-reference.price)+" above retail" : "Same price")
+  document.getElementById("price-difference").textContent = reference && highest !== null
+    ? (highest < reference.price ? money(reference.price-highest)+" below retail" :
+       highest > reference.price ? money(highest-reference.price)+" above retail" : "Same price")
     : "—";
   listings.forEach(listing => {
     const button = element("button", "price-store");
@@ -995,6 +1002,7 @@ document.getElementById("album-select").addEventListener("change", () => {
     updateVinylPricePanel(title, null);
   }
 });
+// tell me how to update the store status display based on the CSV inventory
 function updateStoreStatus() {
   const status = document.getElementById("status");
   if (!status) return;
@@ -1047,7 +1055,7 @@ function showStore(index) {
   document.getElementById("store-picker").value = String(index);
   vinylFocusedStore = String(index);
   document.querySelectorAll(".vinyl-store-name").forEach((label, i) => {
-    label.setAttribute("fill", i === index ? "#ffe5a0" : "#f7f3ef");
+    label.setAttribute("fill", i === index ? "#ff2020" : "#f7f3ef");
     label.setAttribute("aria-pressed", i === index ? "true" : "false");
   });
 
@@ -1152,6 +1160,7 @@ function closePanelOnly() {
     "true"
   );
 }
+// tell me how to close the selected store information panel
 function closeStore() {
   selectedStoreIndex = null;
   document.getElementById("store-picker").value = "";
@@ -1199,11 +1208,13 @@ document.getElementById("next").addEventListener(
     }
   }
 );
+// tell me how to open a record store detail panel when I select a store
 function openStoreDetails(index) {
   scrollToPinnedChapter(1);
   showStore(index);
 }
 
+// tell me how to change which Spotify albums are linked to each record
 const spotifyAlbumIds = {
   "Taylor Swift (Debut)": "<iframe data-testid=\"embed-iframe\" style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/album/7mzrIsaAjnXihW3InKjlC3?utm_source=generator&si=fc62660f01e44fd4\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>",
   "Fearless": "<iframe data-testid=\"embed-iframe\" style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/album/2dqn5yOQWdyGwOpOIi9O4x?utm_source=generator&si=e3b6d6dee5264700\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>",
@@ -1239,6 +1250,7 @@ function extractSpotifyAlbumId(value) {
 
   return match ? match[1] : null;
 }
+// tell me how to open a Spotify player when someone selects an album
 function playAlbumMusic(title) {
   const player = document.getElementById("album-music");
   const iframe = document.getElementById("album-spotify");
@@ -1275,6 +1287,7 @@ function playAlbumMusic(title) {
   document.getElementById("music-note").textContent =
     "Press Play in the Spotify player.";
 }
+// tell me how to close the Spotify player and stop playback
 function closeMusicPlayer() {
   document.getElementById("album-music").hidden = true;
 
@@ -1324,6 +1337,7 @@ document.addEventListener(
     }
   }
 );
+// tell me how to make comparison bars for album prices and quantities
 function addComparisonBar(
   container,
   label,
@@ -1372,11 +1386,13 @@ const scrolly = document.querySelector(
   ".scrolly"
 );
 
+// tell me how to change the steps in my scrolling story
 const steps = [
   ...document.querySelectorAll(
     ".scrolly .step"
   )
 ];
+// tell me how to make the opening visuals change as I scroll down the page
 function updateOpeningScroll() {
   if (!scrolly || !steps.length) {
     return;
@@ -1410,6 +1426,7 @@ function updateOpeningScroll() {
   });
 }
 
+// tell me how to update the active story section based on scrolling
 function updateScrollSections() {
   updateOpeningScroll();
 }
@@ -1417,6 +1434,7 @@ window.addEventListener("scroll", updateScrollSections, {passive: true});
 window.addEventListener("resize", updateScrollSections);
 updateScrollSections();
 
+// tell me how to fade elements into view as I scroll
 const fadeElements = [
   ...document.querySelectorAll(".fade")
 ];
@@ -1448,13 +1466,16 @@ if ("IntersectionObserver" in window) {
     node.classList.add("visible");
   });
 }
+// tell me how to load both CSV files and initialize all the charts and interactive features
 async function initializeWebsite() {
   updateStoreStatus();
 
   try {
     const [inventoryRows, originalPriceRows] =
       await Promise.all([
+// tell me how to change the inventory CSV file used by my website
         loadCSV("./store_inventory.csv"),
+// tell me how to change the original price CSV file used by my website
 loadCSV("./original_price.csv")
       ]);
 
@@ -1513,7 +1534,7 @@ initializeWebsite();
    const rect=root.getBoundingClientRect();
    const travel=Math.max(1,rect.height-innerHeight);
    const p=Math.max(0,Math.min(1,-rect.top/travel));
-   activate(Math.min(scenes.length-1,Math.floor(p*(scenes.length-1)+0.00001)));
+   activate(Math.min(scenes.length-1,Math.floor(p*scenes.length)));
    if(bar)bar.style.width=(p*100)+'%';
  }
  function schedule(){if(!pending){pending=true;requestAnimationFrame(update)}}
@@ -1521,13 +1542,14 @@ initializeWebsite();
    if(e.ctrlKey || e.target.closest('input,textarea,select,[role="slider"]'))return;
    const chapter=e.target.closest('.pinned-chapter.is-active');
    if(!chapter)return;
-   const scrollable=chapter.scrollHeight>chapter.clientHeight+2;
-   const atEnd=e.deltaY>0 && chapter.scrollTop+chapter.clientHeight>=chapter.scrollHeight-2;
-   const atStart=e.deltaY<0 && chapter.scrollTop<=2;
-   if(!scrollable || atEnd || atStart){
-     e.preventDefault();
-     window.scrollBy({top:e.deltaY,left:0,behavior:'instant'});
-   }
+   const scrollingDown=e.deltaY>0;
+   const canScrollInside=chapter.id!=='story-reveal' &&
+     chapter.scrollHeight>chapter.clientHeight+2 &&
+     (scrollingDown ? chapter.scrollTop+chapter.clientHeight<chapter.scrollHeight-2 : chapter.scrollTop>2);
+   if(canScrollInside)return;
+   e.preventDefault();
+   const factor=e.deltaMode===1?16:e.deltaMode===2?window.innerHeight:1;
+   window.scrollTo({top:window.scrollY+e.deltaY*factor,left:0,behavior:'auto'});
  },{passive:false});
  window.addEventListener('scroll',schedule,{passive:true});
  window.addEventListener('resize',schedule);
@@ -1542,16 +1564,17 @@ initializeWebsite();
    if(i<0)return;
    e.preventDefault();
    const y=root.getBoundingClientRect().top+scrollY+
-       (root.offsetHeight-innerHeight)*(i+.05)/scenes.length;
+       (root.offsetHeight-innerHeight)*(i+.5)/scenes.length;
    window.scrollTo({top:y,behavior:'smooth'});
  });
  update();
 })();
+// tell me how to scroll smoothly to a specific chapter in the pinned story
 function scrollToPinnedChapter(i){
  const root=document.getElementById('pinned-story');
  if(!root)return;
  const y=root.getBoundingClientRect().top+window.scrollY+
-  Math.max(0,root.offsetHeight-window.innerHeight)*(i+.05)/document.querySelectorAll("#pinned-story .pinned-chapter").length;
+  Math.max(0,root.offsetHeight-window.innerHeight)*(i+.5)/document.querySelectorAll("#pinned-story .pinned-chapter").length;
  window.scrollTo({top:y,behavior:'smooth'});
 }
 const storeDetailsToggle = document.getElementById("toggle-store-details");
@@ -1561,4 +1584,16 @@ if (storeDetailsToggle) storeDetailsToggle.addEventListener("click", () => {
   storeDetailsToggle.setAttribute("aria-expanded", String(!extra.hidden));
   storeDetailsToggle.textContent = extra.hidden ? "View full store inventory ↓" : "Hide full store inventory ↑";
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
