@@ -12,6 +12,21 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 "use strict";
 const money = value =>
   "$" + Number(value).toFixed(2);
@@ -690,13 +705,6 @@ function renderWall() {
     parent.append(node);
     return node;
   };
-  const allSpreads = albums.flatMap(album => {
-    const retail = retailReferences.get(album.title)?.price;
-    if (!Number.isFinite(retail)) return [];
-    return album.listings.map(row => Math.abs(row.price - retail));
-  });
-  const maxSpread = Math.max(1, ...allSpreads);
-  const maxCopies = Math.max(1, ...albums.flatMap(album => album.listings.map(row => row.quantity || 0)));
   const storeCount = stores.length; // Thirteen equal slices.
   const storeAngle = 2 * Math.PI / storeCount;
   const polar = (radius, angle) => ({
@@ -796,30 +804,14 @@ function renderWall() {
     const color = vinylAlbumColors[album.title] || "#aaa";
     const retail = retailReferences.get(album.title)?.price;
     const hasRetail = Number.isFinite(retail) && retail > 0;
-    const albumInFocus = !selectedAlbum || selectedAlbum === album.title;
-    const albumPeakDifference = hasRetail
-      ? Math.max(0, ...album.listings.filter(row => Number.isFinite(row.price)).map(row => Math.abs(row.price - retail)))
-      : 0;
-    const waveAmplitude = difference => difference <= 0 ? 0 : 2 + 13.5 * Math.pow(Math.min(1, difference / maxSpread), 1.5);
     stores.forEach((store, storeIndex) => {
       const listings = album.listings.filter(row => row.storeIndex === storeIndex);
       const copies = listings.reduce((sum, row) => sum + (row.quantity || 0), 0);
       const hasStock = copies > 0;
       const prices = listings.map(row => row.price).filter(Number.isFinite);
-      const values = hasRetail ? [retail, ...prices] : prices;
-      const low = values.length ? Math.min(...values) : null;
-      const high = values.length ? Math.max(...values) : null;
-      const storeSpread = hasRetail && prices.length
-        ? Math.max(...prices.map(p => Math.abs(p - retail))) : 0;
       const hasPriceComparison = hasStock && hasRetail && prices.length > 0;
-      const amplitude = hasPriceComparison
-        ? waveAmplitude(storeSpread)
-        : 0;
-      const inFocus = vinylFocusedStore === "all" || Number(vinylFocusedStore) === storeIndex;
-      const opacity = 1;
       const startAngle = -Math.PI / 2 + storeIndex * storeAngle;
-      // Every store section has a solid album-colored groove.
-      // Available records add price-sized circles along that SAME groove.
+      // Keep each album’s original color; reduce opacity for stores without stock.
       const gap = 0.008;
       const arcStart = startAngle + gap;
       const arcEnd = startAngle + storeAngle - gap;
@@ -827,7 +819,11 @@ function renderWall() {
       const totalPrice = hasPriceComparison ? retail + storePrice : 0;
       const baseArc = svgItem("path", {
         d: vinylArc(center, center, radius, arcStart, arcEnd),
-        fill: "none", stroke: color, "stroke-width": 2.5,
+        fill: "none",
+        // Unavailable sections are the same album color, just subdued.
+        stroke: color,
+        "stroke-width": 2.5,
+        "stroke-opacity": hasStock ? 1 : .28,
         "stroke-linecap": "butt", "pointer-events": "none"
       });
       svgItem("title", {}, baseArc).textContent =
@@ -1584,6 +1580,9 @@ if (storeDetailsToggle) storeDetailsToggle.addEventListener("click", () => {
   storeDetailsToggle.setAttribute("aria-expanded", String(!extra.hidden));
   storeDetailsToggle.textContent = extra.hidden ? "View full store inventory ↓" : "Hide full store inventory ↑";
 });
+
+
+
 
 
 

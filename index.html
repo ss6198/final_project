@@ -1,3 +1,18 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -900,27 +915,16 @@
 .vinyl-store-side #store-extra[hidden]{display:none}
 .vinyl-store-side .vinyl-select{width:100%}
 
-#dashboard .section-inner{width:min(1480px,calc(100% - 32px))}
-#dashboard .vinyl-explorer{display:flex;flex-direction:column;align-items:center;gap:clamp(28px,5vw,64px)}
-#dashboard .vinyl-disc-area{width:100%;display:flex;flex-direction:column;align-items:center;min-width:0}
-#dashboard #album-chart{width:min(99vw,calc(100svh - 12px),1500px);max-width:100%;aspect-ratio:1;margin:0 auto}
+/* Dashboard layout: one canonical set of rules. */
+#dashboard .section-inner{width:min(1800px,calc(100% - 20px))}
+#dashboard .vinyl-explorer{display:flex;flex-direction:column;align-items:center;gap:28px}
+#dashboard .vinyl-disc-area{width:100%;min-width:0;display:flex;flex-direction:column;align-items:center}
+#dashboard #album-chart{width:min(96vw,calc(100svh - 28px),1300px);max-width:100%;height:auto;aspect-ratio:1;margin:0 auto}
 #dashboard #album-chart svg{display:block;width:100%;height:100%;overflow:visible}
-#dashboard .price-vinyl-key{justify-content:center;max-width:950px}
-#dashboard .vinyl-store-side{width:min(860px,100%);align-self:center;padding:clamp(18px,3vw,36px);background:rgba(12,12,14,.75);border:1px solid rgba(255,255,255,.2)}
-#dashboard .store-picker-label{font-size:clamp(1.2rem,2.4vw,1.9rem)}
-#dashboard .vinyl-store-side .store-panel{max-height:none}
-@media(max-width:650px){
- #dashboard #album-chart{width:min(100%,96vw);height:auto}
- #dashboard .vinyl-store-side{padding:16px}
- #dashboard .price-vinyl-key{justify-content:flex-start}
-}
-
-#dashboard .section-inner{width:min(1900px,calc(100% - 24px))}
-#dashboard .vinyl-explorer{display:grid;grid-template-columns:minmax(210px,1fr) minmax(0,3.7fr) minmax(210px,1fr);align-items:center;gap:clamp(12px,1.5vw,28px)}
-#dashboard .vinyl-disc-area{min-width:0;width:100%}
-#dashboard #album-chart{width:100%;max-width:100%;height:auto;aspect-ratio:1}
-#dashboard .vinyl-store-side,#dashboard .vinyl-price-side{width:100%;min-width:0;align-self:center;padding:clamp(14px,1.4vw,24px);background:rgba(10,10,15,.88);border:1px solid rgba(255,255,255,.24);border-radius:10px;color:#f5f1ec}
-#dashboard .vinyl-store-side .store-panel{padding:12px 0;border:0;background:transparent;max-height:55vh;overflow-y:auto}
+#dashboard .vinyl-details-below{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:min(1250px,100%);gap:24px;align-items:start;margin:0 auto 25px}
+#dashboard .vinyl-details-below > .vinyl-store-side,
+#dashboard .vinyl-details-below > .vinyl-price-side{width:100%;min-width:0;max-height:none;align-self:start;padding:clamp(18px,2vw,28px);background:rgba(10,10,15,.9);border:1px solid rgba(255,255,255,.24);border-radius:10px;overflow:visible}
+#dashboard .vinyl-store-side .store-panel{padding:12px 0;border:0;background:transparent;max-height:none;overflow-y:auto}
 #dashboard .vinyl-store-side .store-panel.open{display:block}
 #dashboard .vinyl-price-side h3{font-size:clamp(1.05rem,1.45vw,1.55rem);margin:10px 0;overflow-wrap:anywhere}
 #dashboard .vinyl-price-side p{line-height:1.45;color:#ddd}
@@ -928,10 +932,8 @@
 #dashboard .vinyl-price-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #555;padding:8px 0}
 #dashboard .vinyl-price-row strong{color:#fff;font-variant-numeric:tabular-nums}
 #dashboard .vinyl-price-explanation{font-size:.8rem;opacity:.82}
-#dashboard .vinyl-disc-area .price-vinyl-key{font-size:.7rem}
-@media(max-width:1050px){#dashboard .vinyl-explorer{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#dashboard .vinyl-disc-area{grid-column:1/-1;grid-row:1}#dashboard .vinyl-store-side{grid-column:1;grid-row:2}#dashboard .vinyl-price-side{grid-column:2;grid-row:2}}
-@media(max-width:650px){#dashboard .vinyl-explorer{grid-template-columns:minmax(0,1fr)}#dashboard .vinyl-disc-area,#dashboard .vinyl-store-side,#dashboard .vinyl-price-side{grid-column:1;grid-row:auto}#dashboard .vinyl-store-side .store-panel{max-height:none}}
-
+#dashboard .vinyl-disc-area .price-vinyl-key{font-size:.8rem}
+@media(max-width:760px){#dashboard .vinyl-details-below{grid-template-columns:minmax(0,1fr);gap:16px}}
 #pinned-story{height:320svh}
 #dashboard .vinyl-price-side{max-height:min(83svh,950px);overflow-y:auto}
 #dashboard .vinyl-price-label{display:block;margin:15px 0 6px;font-size:.8rem;letter-spacing:.02em}
@@ -1203,6 +1205,43 @@ body { background: #101010; color: #f4f0e8; }
 #story-reveal .story-reveal-subtext{font-size:clamp(1.15rem,2.5vw,2rem);font-style:italic;color:#e5d9d8;margin:0 0 clamp(24px,4vh,45px);max-width:none;}
 #story-reveal .story-reveal-transition{font-size:clamp(1.3rem,3vw,2.5rem);font-weight:800;letter-spacing:-.025em;color:#f4f0e8;max-width:none;margin:0;}
 @media(max-width:650px){#story-reveal{padding:24px!important}#story-reveal h2{font-size:clamp(3rem,12vw,5rem)}}
+
+/* Inventory legend to the left of the vinyl (stacked on narrow screens). */
+#dashboard .vinyl-chart-layout {
+  display:grid;
+  grid-template-columns:minmax(180px,260px) minmax(0,1fr);
+  align-items:center;
+  gap:clamp(16px,2.5vw,42px);
+  width:min(100%,1600px);
+  margin:0 auto;
+}
+#dashboard .vinyl-chart-layout .price-vinyl-key {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  flex-wrap:nowrap;
+  gap:17px;
+  margin:0;
+  max-width:none;
+  font-size:clamp(.78rem,1vw,.96rem);
+  line-height:1.5;
+  text-align:left;
+  transform:translateX(18px);
+}
+#dashboard .vinyl-chart-layout .price-vinyl-key span {display:block;}
+#dashboard .vinyl-chart-layout #album-chart {
+  width:min(100%,calc(100svh - 28px),1300px);
+  max-width:100%;
+  margin:0 auto;
+}
+@media(max-width:760px) {
+  #dashboard .vinyl-chart-layout {grid-template-columns:minmax(0,1fr);gap:18px;}
+  #dashboard .vinyl-chart-layout .price-vinyl-key {
+    order:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;transform:none;
+  }
+  #dashboard .vinyl-chart-layout #album-chart {order:1;width:100%;}
+}
 </style>
 </head>
 
@@ -1231,9 +1270,18 @@ body { background: #101010; color: #f4f0e8; }
 
 <div class="vinyl-explorer">
   <div class="vinyl-disc-area">
-    <div class="vinyl-chart" id="album-chart" aria-label="Interactive spinning vinyl with proportional price circles and inventory ticks"></div>
-    <!-- Legend describing the chart symbols -->
-<div class="price-vinyl-key" aria-label="Vinyl chart legend"><span>Each colored ring = a Taylor Swift album</span><span>Plain solid line = no available record or comparable price at this store</span><span>Circles on a solid line = album in stock with retail and store prices recorded</span><span>Pink-outlined circles = original retail price; solid album-colored circles = price found at that record store</span><span>Short tick marks = recorded copies in stock</span></div>
+    <div class="vinyl-chart-layout">
+      <!-- Legend sits to the LEFT of the vinyl on larger screens. -->
+      <div class="price-vinyl-key" aria-label="Vinyl chart legend">
+        <span>Each colored ring = a Taylor Swift album</span>
+        <span>Faded album-colored section = no copies at this store</span>
+        <span>Full-color section = album available at this store</span>
+        <span>Circles = album in stock with retail and store prices recorded</span>
+        <span>Pink-outlined circles = original retail price; solid album-colored circles = store price</span>
+        <span>Short tick marks = recorded copies in stock</span>
+      </div>
+      <div class="vinyl-chart" id="album-chart" aria-label="Interactive spinning vinyl with proportional price circles and inventory ticks"></div>
+    </div>
     
   </div>
 
@@ -1327,6 +1375,9 @@ body { background: #101010; color: #f4f0e8; }
 <script src="script.js"></script>
 </body>
 </html>
+
+
+
 
 
 
